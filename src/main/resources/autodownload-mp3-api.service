@@ -1,0 +1,12 @@
+Description=Auto-Download MP3 API
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+Environment="RUN_ARGS=--spring.config.location=/etc/julien/autodownload-mp3-api/application.yml"
+ExecStart=/opt/julien/autodownload-mp3-api/autodownload-mp3-api.jar
+
+[Install]
+WantedBy=multi-user.target
+

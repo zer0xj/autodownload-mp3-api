@@ -1,0 +1,32 @@
+---
+server:
+  port: 8086
+
+management:
+  endpoints:
+    web:
+      base-path: /
+
+logging.level.com.julien.search: debug
+
+http:
+  pool:
+    poolSize: 50
+    getConnectionTimeout: 5000
+    readTimeout: 100000
+
+youtube:
+  api-key: ${YOUTUBE_APIKEY}
+  maxResults: 5
+
+downloads:
+  location: /home/zer0x/Desktop
+
+history:
+  enabled: true
+  filename: output.txt
+  #location: /home/zer0x/Desktop
+
+youtube-dl:
+  location: /usr/bin/youtube-dl
+
