@@ -38,7 +38,7 @@ class YoutubeSearchService : SearchService {
         val videoList: List<YoutubeVideo> = searchDAO.search(query)
         logger.debug("searchAndDownload(query=$query) SEARCH RESPONSE: $videoList")
 
-        val result = downloadVideo(videoList)
+        val result: YoutubeVideo? = downloadVideo(videoList)
 
         historyDAO.save(query, result)
 
@@ -47,9 +47,9 @@ class YoutubeSearchService : SearchService {
 
     private fun downloadVideo(videoList: List<YoutubeVideo>): YoutubeVideo? {
         for (video in videoList) {
-            video.filename = videoDownloadDAO.download(video)
-            if (video.filename != null) {
-                return video
+            val downloadedVideo = videoDownloadDAO.download(video)
+            if (downloadedVideo?.filename != null) {
+                return downloadedVideo
             }
         }
         return null

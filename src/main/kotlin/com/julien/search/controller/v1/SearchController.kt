@@ -1,5 +1,6 @@
 package com.julien.search.controller.v1
 
+import com.julien.search.model.Mp3DownloadResponse
 import com.julien.search.model.YoutubeVideo
 import com.julien.search.service.SearchService
 import io.swagger.annotations.ApiOperation
@@ -35,19 +36,14 @@ class SearchController {
     """)
     @RequestMapping(value = ["/v1/search/download"], method = [RequestMethod.GET])
     @ResponseBody
-    fun searchAndDownload(@RequestParam query: String): ResponseEntity<String> {
+    fun searchAndDownload(@RequestParam query: String): ResponseEntity<Mp3DownloadResponse> {
 
         val response = searchService.searchAndDownload(query)
 
         return if (response != null) {
-            ResponseEntity.ok("Successfully downloaded ${response.url} for search query[$query]" +
-                    if (response.filename != null) {
-                        " as \"${response.filename}\""
-                    } else {
-                        ""
-                    })
+            ResponseEntity.ok(Mp3DownloadResponse.ModelMapper.from(response, query))
         } else {
-            ResponseEntity.badRequest().body("Could not find a video for query[$query]")
+            ResponseEntity.badRequest().body(Mp3DownloadResponse.ModelMapper.from(response, query))
         }
     }
 }

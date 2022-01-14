@@ -2,9 +2,10 @@ package com.julien.search.model
 
 data class YoutubeVideo(
     val id: String? = null,
-    val title: String? = null
+    val title: String? = null,
+    val filename: String? = null,
+    val previouslyDownloaded: Boolean = false
 ) {
-    var filename: String? = null
     var url: String? = null
 
     fun buildUrl(): String? {

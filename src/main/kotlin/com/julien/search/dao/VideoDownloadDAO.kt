@@ -4,5 +4,5 @@ import com.julien.search.model.YoutubeVideo
 
 interface VideoDownloadDAO {
 
-    fun download(video: YoutubeVideo): String?
+    fun download(video: YoutubeVideo): YoutubeVideo?
 }

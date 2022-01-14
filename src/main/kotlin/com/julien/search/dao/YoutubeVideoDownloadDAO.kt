@@ -23,7 +23,7 @@ class YoutubeVideoDownloadDAO : VideoDownloadDAO {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
     @Throws(DAOException::class)
-    override fun download(video: YoutubeVideo): String? {
+    override fun download(video: YoutubeVideo): YoutubeVideo? {
         try {
             if (video.id == null) {
                 logger.error("ID is null for video[$video]")
@@ -40,7 +40,12 @@ class YoutubeVideoDownloadDAO : VideoDownloadDAO {
             for (filename in File(downloadLocation).list(Mp3FilterFilter())?.asList() ?: emptyList()) {
                 if (filename.contains(video.id)) {
                     logger.info("Already downloaded this song as \"$filename\"")
-                    return filename
+                    return YoutubeVideo(
+                        id = video.id,
+                        title = video.title,
+                        filename = filename,
+                        previouslyDownloaded = true
+                    )
                 }
             }
 
@@ -71,7 +76,12 @@ class YoutubeVideoDownloadDAO : VideoDownloadDAO {
             val response = YoutubeDL.execute(request)
 
             // Response
-            return response.out.substringAfterLast("Destination: ").substringBefore("\n")
+            return YoutubeVideo(
+                id = video.id,
+                title = video.title,
+                filename = response.out.substringAfterLast("Destination: ").substringBefore("\n"),
+                previouslyDownloaded = false,
+            )
         } catch (e: Exception) {
             logger.error("Caught ${e.javaClass.simpleName} trying to download from \"${video.url}\":", e)
             // Throw DAOException here
