@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project leverages Spring Boot, Google's YouTube API, and youtube-dl to provide an API to download videos and convert them to MP3s. It optionally supports saving a list of the queries searched for to make finding songs easier in the event that the wrong song was downloaded.
+This project leverages Spring Boot, JDBC Templates with MySQL, Google's YouTube API, and youtube-dl to provide an API to download videos and convert them to MP3s. It optionally supports saving a list of the queries searched for to make finding songs easier in the event that the wrong song was downloaded.
 
 ## Endpoints
 
@@ -10,7 +10,7 @@ This project leverages Spring Boot, Google's YouTube API, and youtube-dl to prov
 ```
 GET /v1/user/{userId}/search?query={query}
 ```
-This endpoint queries YouTube for the specified string, and returns a list of results:
+This endpoint queries YouTube for the specified string and returns a list of results:
 ```
 [
   {
@@ -59,3 +59,4 @@ This endpoint searches YouTube, downloads the top hit, converts it to an MP3, an
 }
 ```
 &nbsp;
+
