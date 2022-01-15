@@ -8,7 +8,7 @@ This project leverages Spring Boot, Google's YouTube API, and youtube-dl to prov
 
 ### SearchController
 ```
-GET /v1/search?query={query}
+GET /v1/user/{userId}/search?query={query}
 ```
 This endpoint queries YouTube for the specified string, and returns a list of results:
 ```
@@ -47,10 +47,15 @@ This endpoint queries YouTube for the specified string, and returns a list of re
 ```
 &nbsp;
 ```
-GET /v1/search/download?query={query}
+GET /v1/user/{userId}/search/download?query={query}
 ```
 This endpoint searches YouTube, downloads the top hit, converts it to an MP3, and saves it to the location configured in application.yml:
 ```
-Successfully downloaded https://www.youtube.com/watch?v=tbfUQ8k9jzk for search query[song name] as "Guess the Popular Song from 2010 - 2020 Music Quiz-tbfUQ8k9jzk.mp3"
+{
+  "filename": "Guess the Popular Song from 2010 - 2020 Music Quiz-tbfUQ8k9jzk.mp3",
+  "message": "Successfully downloaded https://www.youtube.com/watch?v=tbfUQ8k9jzk for search query[song name] as \"Adele - Hello-YQHsXMglC9A.mp3\"",
+  "query": "song name",
+  "url": "https://www.youtube.com/watch?v=tbfUQ8k9jzk"
+}
 ```
 &nbsp;
