@@ -15,18 +15,23 @@ http:
     getConnectionTimeout: 5000
     readTimeout: 100000
 
+database:
+  url: ${DATABASE_URL}
+  user: ${DATABASE_USER}
+  password: ${DATABASE_PASSWORD}
+
 youtube:
   api-key: ${YOUTUBE_APIKEY}
   maxResults: 5
 
+youtube-dl:
+  location: /usr/local/bin/youtube-dl
+
 downloads:
-  location: /home/zer0x/Desktop
+  location: /Users/zer0x/Desktop
 
 history:
   enabled: true
   filename: output.txt
   #location: /home/zer0x/Desktop
-
-youtube-dl:
-  location: /usr/bin/youtube-dl
 

@@ -26,44 +26,50 @@ class LocalHistoryDAO : HistoryDAO {
     override fun save(query: String, video: YoutubeVideo?) {
         logger.debug("save(query=$query, video=$video")
         if (enabled) {
-            if (saveLocation.isBlank()) {
-                throw DAOException("History save location is not set", "save(query[$query])", ErrorCode.MISSING_CONFIGURATION)
-            }
-
-            try {
-                val historyFile = let {
-                    val s = File(saveLocation)
-                    return@let if (s.isDirectory) {
-                        File(saveLocation +
-                                if (!saveLocation.endsWith("/") && !saveLocation.endsWith("\\")) {
-                                    File.separator
-                                } else {
-                                    ""
-                                } + saveFilename
-                        )
-                    } else {
-                        s
-                    }
+            // We want to save the history of a search regardless of if a file was saved
+            if (!(video?.previouslyDownloaded ?: false)) {
+                if (saveLocation.isBlank()) {
+                    throw DAOException("History save location is not set", "save(query[$query])", ErrorCode.MISSING_CONFIGURATION)
                 }
 
-                if (!historyFile.exists() || !historyFile.canWrite()) {
-                    try {
-                        if (historyFile.createNewFile()) {
-                            logger.debug("Created new file \"${historyFile.name}\"")
+                try {
+                    val historyFile = let {
+                        val s = File(saveLocation)
+                        return@let if (s.isDirectory) {
+                            File(saveLocation +
+                                    if (!saveLocation.endsWith("/") && !saveLocation.endsWith("\\")) {
+                                        File.separator
+                                    } else {
+                                        ""
+                                    } + saveFilename
+                            )
+                        } else {
+                            s
                         }
-                    } catch (i: IOException) {
-                        logger.error("Could not create or write to historyFile[${historyFile.absolutePath}] (query = \"$query\")")
-                        return
                     }
+
+                    if (!historyFile.exists() || !historyFile.canWrite()) {
+                        try {
+                            if (historyFile.createNewFile()) {
+                                logger.debug("Created new file \"${historyFile.name}\"")
+                            }
+                        } catch (i: IOException) {
+                            logger.error("Could not create or write to historyFile[${historyFile.absolutePath}] (query = \"$query\")")
+                            return
+                        }
+                    }
+
+                    historyFile.appendText(query + System.getProperty("line.separator"))
+                } catch (e: Exception) {
+                    logger.error("Caught ${e.javaClass.simpleName} trying to append \"$query\" to saveLocation[$saveLocation], saveFilename[$saveFilename]:", e)
+                    return
                 }
 
-                historyFile.appendText(query + System.getProperty("line.separator"))
-            } catch (e: Exception) {
-                logger.error("Caught ${e.javaClass.simpleName} trying to append \"$query\" to saveLocation[$saveLocation], saveFilename[$saveFilename]:", e)
-                return
+                logger.debug("Saved history of query[$query] to saveLocation[$saveLocation], saveFilename[$saveFilename]")
+            } else {
+                logger.debug("Already downloaded \"${video?.filename}\" for search query[$query]. Not saving history " +
+                        "of repeat search.")
             }
-
-            logger.debug("Saved history of query[$query] to saveLocation[$saveLocation], saveFilename[$saveFilename]")
         }
     }
 }

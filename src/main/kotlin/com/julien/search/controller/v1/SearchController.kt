@@ -18,27 +18,29 @@ class SearchController {
     @ApiOperation(value = "Search YouTube for a given term", notes =
     """
         Example request:
-        GET /v1/search?query=song%20name
+        GET /v1/user/{userId}/search?query=song%20name
         (no body)
     """)
-    @RequestMapping(value = ["/v1/search"], method = [RequestMethod.GET])
+    @RequestMapping(value = ["/v1/user/{userId}/search"], method = [RequestMethod.GET])
     @ResponseBody
-    fun search(@RequestParam query: String): List<YoutubeVideo> {
+    fun search(@PathVariable(required = true) userId: Int,
+               @RequestParam(required = true) query: String): List<YoutubeVideo> {
 
-        return searchService.search(query)
+        return searchService.search(userId, query)
     }
 
     @ApiOperation(value = "Search YouTube for a given term and download the mp3", notes =
     """
         Example request:
-        GET /v1/search/download?query=song%20name
+        GET /v1/user/{userId}/search/download?query=song%20name
         (no body)
     """)
-    @RequestMapping(value = ["/v1/search/download"], method = [RequestMethod.GET])
+    @RequestMapping(value = ["/v1/user/{userId}/search/download"], method = [RequestMethod.GET])
     @ResponseBody
-    fun searchAndDownload(@RequestParam query: String): ResponseEntity<Mp3DownloadResponse> {
+    fun searchAndDownload(@PathVariable(required = true) userId: Int,
+                          @RequestParam(required = true) query: String): ResponseEntity<Mp3DownloadResponse> {
 
-        val response = searchService.searchAndDownload(query)
+        val response = searchService.searchAndDownload(userId, query)
 
         return if (response != null) {
             ResponseEntity.ok(Mp3DownloadResponse.ModelMapper.from(response, query))

@@ -25,7 +25,7 @@ apply plugin: 'jacoco'
 apply plugin: 'kotlin-jpa'
 
 group = 'com.julien.search'
-version = '0.0.3'
+version = '0.0.4'
 
 repositories {
 	mavenCentral()
@@ -39,6 +39,7 @@ ext['log4j2.version'] = '2.17.1'
 dependencies {
 	implementation 'org.jetbrains.kotlin:kotlin-stdlib'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	implementation 'org.springframework:spring-context-support'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
@@ -53,6 +54,7 @@ dependencies {
 	implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
 	implementation group: 'commons-lang', name: 'commons-lang', version: '2.6'
 	implementation group: 'com.github.sapher', name: 'youtubedl-java', version: '1.+'
+	implementation 'mysql:mysql-connector-java'
 	testImplementation 'org.codehaus.groovy:groovy'
 	testImplementation 'junit:junit:4.12'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

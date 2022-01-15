@@ -8,6 +8,9 @@ if [ -z "$YOUTUBE_APIKEY" ]; then
 
 	if [ -e "$LOCALCONFIGFILE" ]; then
 		export YOUTUBE_APIKEY="$(grep -A5 '^youtube:' "$LOCALCONFIGFILE" | grep 'api-key:' | cut -f2- -d':' | sed 's/ //g')"
+		export DATABASE_URL="$(grep -A4 '^database:' "$LOCALCONFIGFILE" | grep 'url:' | cut -f2- -d':' | sed 's/ //g')"
+		export DATABASE_USER="$(grep -A4 '^database:' "$LOCALCONFIGFILE" | grep 'user:' | cut -f2- -d':' | sed 's/ //g')"
+		export DATABASE_PASSWORD="$(grep -A4 '^database:' "$LOCALCONFIGFILE" | grep 'password:' | cut -f2- -d':' | sed 's/ //g')"
 	fi
 fi
 
@@ -19,7 +22,7 @@ fi
 
 BUILD_SUCCESS=0
 
-./gradlew clean build -Pyoutube.api-key="$YOUTUBE_APIKEY" && BUILD_SUCCESS=1
+./gradlew clean build -Pyoutube.api-key="$YOUTUBE_APIKEY" -Pdatabase.url="$DATABASE_URL" -Pdatabase.user="$DATABASE_USER" -Pdatabase.password="$DATABASE_PASSWORD" && BUILD_SUCCESS=1
 
 [ $SERVICE_RUNNING -eq "0" ] && sudo systemctl start "$PROJECT_NAME"
 

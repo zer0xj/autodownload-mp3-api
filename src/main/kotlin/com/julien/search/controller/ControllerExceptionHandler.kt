@@ -1,6 +1,7 @@
 package com.julien.search.controller
 
 import com.julien.search.controller.v1.ControllerException
+import com.julien.search.dao.DAOException
 import com.julien.search.service.BaseException
 import com.julien.search.service.ServiceException
 import org.springframework.http.HttpStatus
@@ -18,6 +19,7 @@ class ControllerExceptionHandler : ResponseEntityExceptionHandler() {
     fun handleException(h: HttpServletRequest, b: BaseException): ResponseEntity<String> {
         val httpStatus: HttpStatus = b.errorCode?.httpStatus ?: when (b) {
             is ControllerException -> HttpStatus.UNAUTHORIZED
+            is DAOException -> HttpStatus.BAD_GATEWAY
             is ServiceException -> HttpStatus.INTERNAL_SERVER_ERROR
             else -> HttpStatus.SERVICE_UNAVAILABLE
         }
@@ -37,6 +39,7 @@ class ControllerExceptionHandler : ResponseEntityExceptionHandler() {
         }
         val httpStatus: HttpStatus = when (ex) {
             is ControllerException -> HttpStatus.UNAUTHORIZED
+            is DAOException -> HttpStatus.BAD_GATEWAY
             is ServiceException -> HttpStatus.INTERNAL_SERVER_ERROR
             else -> HttpStatus.SERVICE_UNAVAILABLE
         }

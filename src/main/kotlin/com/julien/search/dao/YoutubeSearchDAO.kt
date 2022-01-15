@@ -61,8 +61,6 @@ class YoutubeSearchDAO : SearchDAO {
     }
 
     private fun getYouTube(): YouTube {
-        return YouTube.Builder(NetHttpTransport(), GsonFactory()) { request: HttpRequest? -> }
-            .setApplicationName("autodownload-mp3-api")
-            .build()
+        return YouTube.Builder(NetHttpTransport(), GsonFactory()) {}.setApplicationName("autodownload-mp3-api").build()
     }
 }
