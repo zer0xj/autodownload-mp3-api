@@ -1,9 +1,9 @@
-package com.julien.search.dao
+package com.julien.search.config
 
 import com.julien.search.model.ErrorCode
 import com.julien.search.service.BaseException
 
-class DAOException : BaseException {
+class AsyncException : BaseException {
     constructor(sourceId: String?) : super(sourceId)
     constructor(message: String?, cause: Throwable?, sourceId: String?, errorCode: ErrorCode?) : super(message, cause, sourceId, errorCode)
     constructor(message: String?, sourceId: String?, errorCode: ErrorCode?) : super(message, sourceId, errorCode)

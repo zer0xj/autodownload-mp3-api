@@ -35,7 +35,7 @@ class SearchController {
     @RequestMapping(value = ["/v1/user/{userId}/search/download"], method = [RequestMethod.GET])
     @ResponseBody
     fun searchAndDownload(@PathVariable("userId") userId: Int,
-                          @RequestParam(required = true) query: String): JobResponse = searchService.searchAndDownload(userId, query)
+                          @RequestParam(required = true) query: String): JobResponse? = searchService.searchAndDownload(userId, query)
 
     @ApiOperation(value = "Search YouTube for a given term and download the mp3", notes =
     """

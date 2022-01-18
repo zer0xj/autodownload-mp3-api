@@ -3,10 +3,12 @@ package com.julien.search.model
 import org.apache.commons.lang.StringUtils
 
 data class User(
-    val userName: String,
+    val userName: String? = null,
     val email: String? = null,
     val adminUser: Boolean = false
 ) {
+    fun isValid(): Boolean = (userName != null)
+
     object ModelMapper {
         fun from(dbMap: MutableMap<String, Any>): User =
             User(

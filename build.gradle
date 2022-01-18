@@ -54,16 +54,16 @@ dependencies {
 	implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
 	implementation group: 'commons-lang', name: 'commons-lang', version: '2.6'
 	implementation group: 'com.github.sapher', name: 'youtubedl-java', version: '1.+'
+	implementation group: 'com.google.guava', name: 'guava', version: '31.0.1-jre'
 	implementation 'mysql:mysql-connector-java'
 	testImplementation 'org.codehaus.groovy:groovy'
 	testImplementation 'junit:junit:4.12'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-	kotlinOptions {
-		freeCompilerArgs = ['-Xjsr305=strict']
-        jvmTarget = '11'
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(11)
 	}
 }
 

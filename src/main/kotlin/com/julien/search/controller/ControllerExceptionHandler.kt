@@ -1,6 +1,6 @@
 package com.julien.search.controller
 
-import com.julien.search.controller.v1.ControllerException
+import com.julien.search.config.AsyncException
 import com.julien.search.dao.DAOException
 import com.julien.search.service.BaseException
 import com.julien.search.service.ServiceException
@@ -18,6 +18,7 @@ class ControllerExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(BaseException::class)
     fun handleException(h: HttpServletRequest, b: BaseException): ResponseEntity<String> {
         val httpStatus: HttpStatus = b.errorCode?.httpStatus ?: when (b) {
+            is AsyncException -> HttpStatus.INTERNAL_SERVER_ERROR
             is ControllerException -> HttpStatus.UNAUTHORIZED
             is DAOException -> HttpStatus.BAD_GATEWAY
             is ServiceException -> HttpStatus.INTERNAL_SERVER_ERROR
@@ -38,6 +39,7 @@ class ControllerExceptionHandler : ResponseEntityExceptionHandler() {
             null
         }
         val httpStatus: HttpStatus = when (ex) {
+            is AsyncException -> HttpStatus.INTERNAL_SERVER_ERROR
             is ControllerException -> HttpStatus.UNAUTHORIZED
             is DAOException -> HttpStatus.BAD_GATEWAY
             is ServiceException -> HttpStatus.INTERNAL_SERVER_ERROR

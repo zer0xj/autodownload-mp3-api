@@ -1,9 +1,12 @@
 package com.julien.search.service
 
+import com.google.common.cache.LoadingCache
+import com.julien.search.config.AsyncException
 import com.julien.search.dao.HistoryDAO
-import com.julien.search.dao.VideoDownloadDAO
 import com.julien.search.dao.SearchDAO
 import com.julien.search.dao.UserDAO
+import com.julien.search.dao.VideoDownloadDAO
+import com.julien.search.model.ErrorCode
 import com.julien.search.model.JobResponse
 import com.julien.search.model.Mp3DownloadResponse
 import com.julien.search.model.YoutubeVideo
@@ -14,6 +17,7 @@ import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
 import java.util.*
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionException
 
 @Service
 class YoutubeSearchService : SearchService {
@@ -30,7 +34,8 @@ class YoutubeSearchService : SearchService {
     @Autowired
     private lateinit var videoDownloadDAO: VideoDownloadDAO
 
-    private val processedVideos: MutableMap<String, Mp3DownloadResponse> = mutableMapOf() // TODO convert to Guava cache
+    @Autowired
+    private lateinit var processedVideos: LoadingCache<Int, MutableMap<String, Mp3DownloadResponse>>
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
@@ -40,7 +45,7 @@ class YoutubeSearchService : SearchService {
 
         userDAO.validateUserName(userId)
 
-        return processedVideos[jobId]
+        return processedVideos.get(userId)[jobId]
     }
 
     override fun search(userId: Int, query: String): List<YoutubeVideo> {
@@ -60,9 +65,24 @@ class YoutubeSearchService : SearchService {
 
         val uuid = UUID.randomUUID().toString()
 
-        CompletableFuture.runAsync { asyncSearchAndDownload(userId, uuid, query) }
+        val asyncCall = CompletableFuture.runAsync { asyncSearchAndDownload(userId, uuid, query) }
 
-        return JobResponse(jobId = uuid)
+        return try {
+            asyncCall.join()
+
+            if (asyncCall.isDone) {
+                JobResponse(jobId = uuid)
+            } else {
+                JobResponse()
+            }
+        } catch (b: BaseException) {
+            throw b
+        } catch (c: CompletionException) {
+            throw AsyncException(c.message, c, "searchAndDownload(userId=$userId, query=$query)", ErrorCode.ASYNC_ERROR)
+        } catch (e: Exception) {
+            throw ServiceException("Caught ${e.javaClass.simpleName} trying to search and download an MP3 for query[$query]",
+                e, "searchAndDownload(userId=$userId, query=$query)", ErrorCode.SEARCH_SERVICE_ERROR)
+        }
     }
 
     private fun downloadVideo(videoList: List<YoutubeVideo>): YoutubeVideo? {
@@ -81,7 +101,7 @@ class YoutubeSearchService : SearchService {
 
         userDAO.validateUserName(userId)
 
-        processedVideos[jobId] = Mp3DownloadResponse(query = query)
+        processedVideos.get(userId)[jobId] = Mp3DownloadResponse(query = query)
 
         val videoList: List<YoutubeVideo> = searchDAO.search(query)
 
@@ -91,7 +111,7 @@ class YoutubeSearchService : SearchService {
 
         logger.debug("asyncSearchAndDownload(userId=$userId, jobId=$jobId, query=$query) DOWNLOAD RESPONSE: $result")
 
-        processedVideos[jobId] = Mp3DownloadResponse.ModelMapper.from(result, query)
+        processedVideos.get(userId)[jobId] = Mp3DownloadResponse.ModelMapper.from(result, query)
 
         historyDAO.save(query, result)
     }

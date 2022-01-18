@@ -2,8 +2,7 @@ package com.julien.search.service
 
 import com.julien.search.model.ErrorCode
 
-open class ServiceException : BaseException {
-
+class ServiceException : BaseException {
     constructor(sourceId: String?) : super(sourceId)
     constructor(message: String?, cause: Throwable?, sourceId: String?, errorCode: ErrorCode?) : super(message, cause, sourceId, errorCode)
     constructor(message: String?, sourceId: String?, errorCode: ErrorCode?) : super(message, sourceId, errorCode)

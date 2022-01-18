@@ -1,7 +1,9 @@
 package com.julien.search.dao
 
 import com.julien.search.model.ErrorCode
+import com.julien.search.model.User
 import com.julien.search.repository.UserRepository
+import com.julien.search.service.BaseException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,17 +19,22 @@ class DefaultUserDAO : UserDAO {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
     @Throws(DAOException::class)
-    override fun validateUserName(userId: Int) {
+    override fun validateUserName(userId: Int): User {
         try {
             val userLookup = userRepository.selectUserByUserName(userId)
-            if (userLookup == null) {
+            if (!userLookup.isValid()) {
                 throw DAOException("Could not find a valid user for userId[$userId]", "validateUserName($userId)",
                     ErrorCode.INVALID_USERNAME)
-            } else if (logger.isDebugEnabled) {
-                logger.debug("Successfully validated userId[$userId]: $userLookup")
             } else {
-                logger.info("Successfully validated userName[${userLookup.userName}] by userId[$userId]")
+                if (logger.isDebugEnabled) {
+                    logger.debug("Successfully validated userId[$userId]: $userLookup")
+                } else {
+                    logger.info("Successfully validated userName[${userLookup.userName}] by userId[$userId]")
+                }
+                return userLookup
             }
+        } catch (b: BaseException) {
+            throw b
         } catch (d: DataAccessException) {
             throw DAOException("Caught DataAccessException trying to validate if user exists for userId[$userId]", d,
                 "validateUserName($userId)", ErrorCode.DATABASE_ERROR)
