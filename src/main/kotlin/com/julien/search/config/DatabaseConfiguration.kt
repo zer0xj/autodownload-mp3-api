@@ -33,7 +33,7 @@ class DatabaseConfiguration {
             @Value("\${database.maxTotal:45}") maxTotal: Int,
             @Value("\${database.initialSize:20}") initialSize: Int,
             @Value("\${database.maxWaitMillis:8000}") maxWaitMillis: Int,
-            @Value("\${database.validationQuery:select 1 from systables limit 1}") validationQuery: String): DataSource {
+            @Value("\${database.validationQuery:select 1 from users limit 1}") validationQuery: String): DataSource {
 
         val dataSource: DataSource = DataSource()
         dataSource.setDriverClassName(driverClassName)
