@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class Mp3DownloadResponse(
     val filename: String? = null,
-    val query: String? = null,
     val previouslyDownloaded: Boolean? = null,
+    val query: String? = null,
     val success: Boolean? = null,
     val url: String? = null
 ) {

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service
 import java.io.File
 import java.io.FilenameFilter
 
+
 @Service
 class YoutubeVideoDownloadDAO : VideoDownloadDAO {
 
@@ -27,9 +28,6 @@ class YoutubeVideoDownloadDAO : VideoDownloadDAO {
         try {
             if (video.id == null) {
                 logger.error("ID is null for video[$video]")
-                return null
-            } else if (video.url == null) {
-                logger.error("URL is null for video[$video]")
                 return null
             }
 
@@ -49,7 +47,6 @@ class YoutubeVideoDownloadDAO : VideoDownloadDAO {
                 }
             }
 
-            // Build request
             val request = YoutubeDLRequest(video.url, downloadLocation)
 
             // Add youtube-dl command-line options
@@ -71,16 +68,13 @@ class YoutubeVideoDownloadDAO : VideoDownloadDAO {
 
             YoutubeDL.setExecutablePath(youtubeDlLocation)
 
-            // Make request and return response
-
             val response = YoutubeDL.execute(request)
 
-            // Response
             return YoutubeVideo(
                 id = video.id,
-                title = video.title,
                 filename = response.out.substringAfterLast("Destination: ").substringBefore("\n"),
                 previouslyDownloaded = false,
+                title = video.title
             )
         } catch (e: Exception) {
             logger.error("Caught ${e.javaClass.simpleName} trying to download from \"${video.url}\":", e)

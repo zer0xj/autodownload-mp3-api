@@ -16,9 +16,11 @@ http:
     readTimeout: 100000
 
 database:
-  url: ${DATABASE_URL}
-  user: ${DATABASE_USER}
-  password: ${DATABASE_PASSWORD}
+  login:
+    url: ${DATABASE_URL}
+    user: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+    enableUserValidation: false
 
 youtube:
   api-key: ${YOUTUBE_APIKEY}

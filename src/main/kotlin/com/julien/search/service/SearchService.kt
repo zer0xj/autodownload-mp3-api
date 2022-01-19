@@ -8,6 +8,8 @@ interface SearchService {
 
     fun getProcessingJobs(userId: Int): List<Mp3DownloadResponse>
 
+    fun getJobStatus(userId: Int, jobId: String): Mp3DownloadResponse?
+
     fun search(userId: Int, query: String): List<YoutubeVideo>
 
     fun searchAndDownload(userId: Int, query: String): ProcessingJob
