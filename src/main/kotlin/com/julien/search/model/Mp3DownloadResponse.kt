@@ -27,7 +27,7 @@ data class Mp3DownloadResponse(
         } else if (this.success == false) {
             "Failed to download an MP3 for search query[$query]"
         } else {
-            "Processing query"
+            "Currently processing search query[$query]"
         }
     }
 
