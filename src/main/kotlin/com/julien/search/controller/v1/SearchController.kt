@@ -15,6 +15,17 @@ class SearchController {
     @Autowired
     private lateinit var searchService: SearchService
 
+    @ApiOperation(value = "Get the status of a user's download", notes =
+    """
+        Example request:
+        GET /v1/user/{userId}/search/download/status/{jobId}
+        (no body)
+    """)
+    @RequestMapping(value = ["/v1/user/{userId}/search/download/status/{jobId}"], method = [RequestMethod.GET])
+    @ResponseBody
+    fun getJobStatus(@PathVariable("userId") userId: Int,
+                     @PathVariable("jobId") jobId: String): Mp3DownloadResponse? = searchService.getJobStatus(userId, jobId)
+
     @ApiOperation(value = "Search YouTube for a given term", notes =
     """
         Example request:
