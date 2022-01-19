@@ -15,16 +15,30 @@ class SearchController {
     @Autowired
     private lateinit var searchService: SearchService
 
-    @ApiOperation(value = "Get the status of a user's download", notes =
+    @ApiOperation(value = "Get download statuses for your user", notes =
+    """
+        Example request:
+        GET /v1/user/{userId}/search/download/status
+        (no body)
+        
+        Note: admin users can see the status of all jobs
+    """)
+    @RequestMapping(value = ["/v1/user/{userId}/search/download/status"], method = [RequestMethod.GET])
+    @ResponseBody
+    fun getProcessingJobs(@PathVariable("userId") userId: Int): List<Mp3DownloadResponse> = searchService.getProcessingJobs(userId)
+
+    @ApiOperation(value = "Get the status of a specific video download", notes =
     """
         Example request:
         GET /v1/user/{userId}/search/download/status/{jobId}
         (no body)
+        
+        Note: admin users can see the status of all jobs
     """)
     @RequestMapping(value = ["/v1/user/{userId}/search/download/status/{jobId}"], method = [RequestMethod.GET])
     @ResponseBody
-    fun getJobStatus(@PathVariable("userId") userId: Int,
-                     @PathVariable("jobId") jobId: String): Mp3DownloadResponse? = searchService.getJobStatus(userId, jobId)
+    fun getSpecificJobStatus(@PathVariable("userId") userId: Int,
+                             @PathVariable("jobId") jobId: String): Mp3DownloadResponse? = searchService.getJobStatus(userId, jobId)
 
     @ApiOperation(value = "Search YouTube for a given term", notes =
     """
@@ -47,16 +61,4 @@ class SearchController {
     @ResponseBody
     fun searchAndDownload(@PathVariable("userId") userId: Int,
                           @RequestParam(required = true) query: String): ProcessingJob = searchService.searchAndDownload(userId, query)
-
-    @ApiOperation(value = "Get download statuses for your user", notes =
-    """
-        Example request:
-        GET /v1/user/{userId}/search/download/status
-        (no body)
-        
-        Note: admin users will see the status of all jobs
-    """)
-    @RequestMapping(value = ["/v1/user/{userId}/search/download/status"], method = [RequestMethod.GET])
-    @ResponseBody
-    fun getDownloadStatus(@PathVariable("userId") userId: Int): List<Mp3DownloadResponse> = searchService.getProcessingJobs(userId)
 }

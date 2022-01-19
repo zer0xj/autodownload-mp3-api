@@ -5,7 +5,9 @@ import com.julien.search.dao.HistoryDAO
 import com.julien.search.dao.SearchDAO
 import com.julien.search.dao.UserDAO
 import com.julien.search.dao.VideoDownloadDAO
-import com.julien.search.model.*
+import com.julien.search.model.Mp3DownloadResponse
+import com.julien.search.model.ProcessingJob
+import com.julien.search.model.YoutubeVideo
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,17 +36,52 @@ class YoutubeSearchService : SearchService {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
-    override fun getProcessingJobs(userId: Int): List<Mp3DownloadResponse> {
+    override fun getJobStatus(userId: Int, jobId: String): Mp3DownloadResponse? {
 
-        logger.debug("getJobStatuses(userId=$userId)")
+        logger.debug("getJobStatus(userId=$userId, jobId=$jobId)")
 
         val user = userDAO.validateUserName(userId)
 
-        return if (user.adminUser) {
+        val filteredJobs: List<ProcessingJob> = processedVideos.asMap().values.filter { it.jobId == jobId }
+
+        if (filteredJobs.isEmpty()) {
+            return null
+        } else if (filteredJobs.size > 1) {
+            val logMessage = "Found more than one job in cache for jobId[$jobId]: $filteredJobs. Returning first " +
+                    "value (if applicable) for user"
+            if (logger.isDebugEnabled) {
+                logger.warn("${logMessage}[$user].")
+            } else {
+                logger.warn("${logMessage}Id[$userId].")
+            }
+        }
+
+        val response = if (user.adminUser) {
+            filteredJobs.firstOrNull()?.response
+        } else {
+            filteredJobs.firstOrNull { it.userId == userId }?.response
+        }
+
+        logger.debug("getJobStatus(userId=$userId, jobId=$jobId) RESPONSE: $response")
+
+        return response
+    }
+
+    override fun getProcessingJobs(userId: Int): List<Mp3DownloadResponse> {
+
+        logger.debug("getProcessingJobs(userId=$userId)")
+
+        val user = userDAO.validateUserName(userId)
+
+        val response = if (user.adminUser) {
             processedVideos.asMap().values.mapNotNull { it.response }.toList()
         } else {
             processedVideos.asMap().values.filter { it.userId == userId }.mapNotNull { it.response }.toList()
         }
+
+        logger.debug("getProcessingJobs(userId=$userId) RESPONSE: $response")
+
+        return response
     }
 
     override fun search(userId: Int, query: String): List<YoutubeVideo> {
@@ -91,16 +128,6 @@ class YoutubeSearchService : SearchService {
         }
     }
 
-    private fun downloadVideo(videoList: List<YoutubeVideo>): YoutubeVideo? {
-        for (video in videoList) {
-            val downloadedVideo = videoDownloadDAO.download(video)
-            if (downloadedVideo?.filename != null) {
-                return downloadedVideo
-            }
-        }
-        return null
-    }
-
     @Async("threadPoolTaskExecutor")
     fun asyncSearchAndDownload(userId: Int, jobId: String, query: String) {
         logger.debug("asyncSearchAndDownload(userId=$userId, jobId=$jobId, query=$query)")
@@ -121,5 +148,15 @@ class YoutubeSearchService : SearchService {
             ))
 
         historyDAO.save(query, result)
+    }
+
+    private fun downloadVideo(videoList: List<YoutubeVideo>): YoutubeVideo? {
+        for (video in videoList) {
+            val downloadedVideo = videoDownloadDAO.download(video)
+            if (downloadedVideo?.filename != null) {
+                return downloadedVideo
+            }
+        }
+        return null
     }
 }
