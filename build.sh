@@ -22,7 +22,7 @@ fi
 
 BUILD_SUCCESS=0
 
-./gradlew clean build -Pyoutube.api-key="$YOUTUBE_APIKEY" -Pdatabase.url="$DATABASE_URL" -Pdatabase.user="$DATABASE_USER" -Pdatabase.password="$DATABASE_PASSWORD" && BUILD_SUCCESS=1
+./gradlew clean build -Pyoutube.api-key="$YOUTUBE_APIKEY" -Pdatabase.login.url="$DATABASE_URL" -Pdatabase.login.user="$DATABASE_USER" -Pdatabase.login.password="$DATABASE_PASSWORD" && BUILD_SUCCESS=1
 
 [ $SERVICE_RUNNING -eq "0" ] && sudo systemctl start "$PROJECT_NAME"
 
