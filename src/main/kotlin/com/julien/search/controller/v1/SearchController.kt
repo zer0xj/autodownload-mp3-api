@@ -1,7 +1,7 @@
 package com.julien.search.controller.v1
 
-import com.julien.search.model.JobResponse
 import com.julien.search.model.Mp3DownloadResponse
+import com.julien.search.model.ProcessingJob
 import com.julien.search.model.YoutubeVideo
 import com.julien.search.service.SearchService
 import io.swagger.annotations.ApiOperation
@@ -35,16 +35,17 @@ class SearchController {
     @RequestMapping(value = ["/v1/user/{userId}/search/download"], method = [RequestMethod.GET])
     @ResponseBody
     fun searchAndDownload(@PathVariable("userId") userId: Int,
-                          @RequestParam(required = true) query: String): JobResponse? = searchService.searchAndDownload(userId, query)
+                          @RequestParam(required = true) query: String): ProcessingJob = searchService.searchAndDownload(userId, query)
 
-    @ApiOperation(value = "Search YouTube for a given term and download the mp3", notes =
+    @ApiOperation(value = "Get download statuses for your user", notes =
     """
         Example request:
-        GET /v1/user/{userId}/search/download/status/{jobId}
+        GET /v1/user/{userId}/search/download/status
         (no body)
+        
+        Note: admin users will see the status of all jobs
     """)
-    @RequestMapping(value = ["/v1/user/{userId}/search/download/status/{jobId}"], method = [RequestMethod.GET])
+    @RequestMapping(value = ["/v1/user/{userId}/search/download/status"], method = [RequestMethod.GET])
     @ResponseBody
-    fun getDownloadStatus(@PathVariable("userId") userId: Int,
-                          @PathVariable("jobId") jobId: String): Mp3DownloadResponse? = searchService.getDownloadStatus(userId, jobId)
+    fun getDownloadStatus(@PathVariable("userId") userId: Int): List<Mp3DownloadResponse> = searchService.getProcessingJobs(userId)
 }
