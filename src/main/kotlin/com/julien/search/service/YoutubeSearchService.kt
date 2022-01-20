@@ -73,7 +73,8 @@ class YoutubeSearchService : SearchService {
 
         val jobs = getProcessingJobs(userId).groupingBy { it.success }.eachCount()
 
-        val response = mapOf("COMPLETED" to (jobs[true] ?: 0), "FAILED" to (jobs[false] ?: 0), "PENDING" to (jobs[null] ?: 0))
+        val response = mapOf(STATUS_COMPLETE to (jobs[true] ?: 0), STATUS_FAILURE to (jobs[false] ?: 0),
+            STATUS_PENDING to (jobs[null] ?: 0))
 
         logger.debug("getJobSummary(userId=$userId) RESPONSE: $response")
 
@@ -172,4 +173,8 @@ class YoutubeSearchService : SearchService {
         }
         return null
     }
+
+    private val STATUS_COMPLETE = "completed"
+    private val STATUS_FAILURE = "failed"
+    private val STATUS_PENDING = "pending"
 }
