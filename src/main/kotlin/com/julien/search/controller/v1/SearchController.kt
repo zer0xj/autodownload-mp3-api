@@ -15,6 +15,18 @@ class SearchController {
     @Autowired
     private lateinit var searchService: SearchService
 
+    @ApiOperation(value = "Get summary of download statuses for your user", notes =
+    """
+        Example request:
+        GET /v1/user/{userId}/search/download/summary
+        (no body)
+
+        Note: admin users can see the status of all jobs
+    """)
+    @RequestMapping(value = ["/v1/user/{userId}/search/download/summary"], method = [RequestMethod.GET])
+    @ResponseBody
+    fun getJobSummary(@PathVariable("userId") userId: Int): Map<String, Int> = searchService.getJobSummary(userId)
+
     @ApiOperation(value = "Get download statuses for your user", notes =
     """
         Example request:

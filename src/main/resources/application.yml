@@ -20,7 +20,7 @@ database:
     url: ${DATABASE_URL}
     user: ${DATABASE_USER}
     password: ${DATABASE_PASSWORD}
-    enableUserValidation: false
+    #enableUserValidation: false
 
 youtube:
   api-key: ${YOUTUBE_APIKEY}

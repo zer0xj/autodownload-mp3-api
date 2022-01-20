@@ -67,6 +67,19 @@ class YoutubeSearchService : SearchService {
         return response
     }
 
+    override fun getJobSummary(userId: Int): Map<String, Int> {
+
+        logger.debug("getJobSummary(userId=$userId)")
+
+        val jobs = getProcessingJobs(userId).groupingBy { it.success }.eachCount()
+
+        val response = mapOf("COMPLETED" to (jobs[true] ?: 0), "FAILED" to (jobs[false] ?: 0), "PENDING" to (jobs[null] ?: 0))
+
+        logger.debug("getJobSummary(userId=$userId) RESPONSE: $response")
+
+        return response
+    }
+
     override fun getProcessingJobs(userId: Int): List<Mp3DownloadResponse> {
 
         logger.debug("getProcessingJobs(userId=$userId)")

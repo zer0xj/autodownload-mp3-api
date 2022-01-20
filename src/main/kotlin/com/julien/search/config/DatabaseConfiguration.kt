@@ -12,14 +12,11 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 class DatabaseConfiguration {
 
     @Bean("mySqlNamedJdbcTemplate")
-    fun mySqlNamedJdbcTemplate(@Qualifier("mySqlDS") datasource: DataSource): NamedParameterJdbcTemplate {
-        return NamedParameterJdbcTemplate(datasource)
-    }
+    fun mySqlNamedJdbcTemplate(@Qualifier("mySqlDS") datasource: DataSource): NamedParameterJdbcTemplate =
+        NamedParameterJdbcTemplate(datasource)
 
     @Bean("mySqlJdbcTemplate")
-    fun mySqlJdbcTemplate(@Qualifier("mySqlDS") datasource: DataSource): JdbcTemplate {
-        return JdbcTemplate(datasource)
-    }
+    fun mySqlJdbcTemplate(@Qualifier("mySqlDS") datasource: DataSource): JdbcTemplate = JdbcTemplate(datasource)
 
     @Bean("mySqlDS")
     fun mySqlDS(

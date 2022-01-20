@@ -6,9 +6,11 @@ import com.julien.search.model.YoutubeVideo
 
 interface SearchService {
 
-    fun getProcessingJobs(userId: Int): List<Mp3DownloadResponse>
-
     fun getJobStatus(userId: Int, jobId: String): Mp3DownloadResponse?
+
+    fun getJobSummary(userId: Int): Map<String, Int>
+
+    fun getProcessingJobs(userId: Int): List<Mp3DownloadResponse>
 
     fun search(userId: Int, query: String): List<YoutubeVideo>
 
