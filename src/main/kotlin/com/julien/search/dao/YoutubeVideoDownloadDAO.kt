@@ -2,8 +2,6 @@ package com.julien.search.dao
 
 import com.julien.search.model.ErrorCode
 import com.julien.search.model.YoutubeVideo
-import com.sapher.youtubedl.YoutubeDL
-import com.sapher.youtubedl.YoutubeDLRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -24,7 +22,7 @@ class YoutubeVideoDownloadDAO : VideoDownloadDAO {
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
     @Throws(DAOException::class)
-    override fun download(video: YoutubeVideo): YoutubeVideo? {
+    override fun initialize(video: YoutubeVideo): YoutubeVideo? {
         try {
             if (video.id == null) {
                 logger.error("ID is null for video[$video]")
@@ -42,12 +40,13 @@ class YoutubeVideoDownloadDAO : VideoDownloadDAO {
                         id = video.id,
                         title = video.title,
                         filename = filename,
-                        previouslyDownloaded = true
+                        previouslyDownloaded = true,
+                        youtubeDL = LocalYoutubeDL()
                     )
                 }
             }
 
-            val request = YoutubeDLRequest(video.url, downloadLocation)
+            val request = LocalYoutubeDLRequest(video.url, downloadLocation)
 
             // Add youtube-dl command-line options
             request.setOption("add-metadata")
@@ -66,11 +65,25 @@ class YoutubeVideoDownloadDAO : VideoDownloadDAO {
             request.setOption("xattrs")
             request.setOption("youtube-skip-dash-manifest")
 
-            YoutubeDL.setExecutablePath(youtubeDlLocation)
-
-            val response = YoutubeDL.execute(request)
-
             return YoutubeVideo(
+                id = video.id,
+                previouslyDownloaded = false,
+                title = video.title,
+                youtubeDL = LocalYoutubeDL(request, youtubeDlLocation)
+            )
+        } catch (e: Exception) {
+            logger.error("Caught ${e.javaClass.simpleName} trying to download from \"${video.url}\":", e)
+            // Throw DAOException here
+            return null
+        }
+    }
+
+    @Throws(DAOException::class)
+    override fun download(video: YoutubeVideo): YoutubeVideo? = if (!video.previouslyDownloaded) {
+        try {
+            val response = video.youtubeDL!!.execute()
+
+            YoutubeVideo(
                 id = video.id,
                 filename = response.out.substringAfterLast("Destination: ").substringBefore("\n"),
                 previouslyDownloaded = false,
@@ -78,9 +91,11 @@ class YoutubeVideoDownloadDAO : VideoDownloadDAO {
             )
         } catch (e: Exception) {
             logger.error("Caught ${e.javaClass.simpleName} trying to download from \"${video.url}\":", e)
-            // Throw DAOException here
-            return null
+            // Throw DAOException here?
+            null
         }
+    } else {
+        video
     }
 
     internal class Mp3FilterFilter : FilenameFilter {

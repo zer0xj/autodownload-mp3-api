@@ -56,15 +56,15 @@ class YoutubeSearchService : SearchService {
             }
         }
 
-        val response = if (user.adminUser) {
-            filteredJobs.firstOrNull()?.response
+        val job = if (user.adminUser) {
+            filteredJobs.firstOrNull()
         } else {
-            filteredJobs.firstOrNull { it.userId == userId }?.response
+            filteredJobs.firstOrNull { it.userId == userId }
         }
 
-        logger.debug("getJobStatus(userId=$userId, jobId=$jobId) RESPONSE: $response")
+        logger.debug("getJobStatus(userId=$userId, jobId=$jobId) RESPONSE: ${job?.response}")
 
-        return response
+        return job?.response
     }
 
     override fun getJobSummary(userId: Int): Map<String, Int> {
@@ -150,25 +150,33 @@ class YoutubeSearchService : SearchService {
 
         logger.debug("asyncSearchAndDownload(userId=$userId, jobId=$jobId, query=$query) SEARCH RESPONSE: $videoList")
 
-        val result: YoutubeVideo? = downloadVideo(videoList)
+        val result: YoutubeVideo? = downloadVideo(userId, jobId, query, videoList)
 
         logger.debug("asyncSearchAndDownload(userId=$userId, jobId=$jobId, query=$query) DOWNLOAD RESPONSE: $result")
-
-        processedVideos.put(query,
-            ProcessingJob(
-                userId = userId,
-                jobId = jobId,
-                response = Mp3DownloadResponse.ModelMapper.from(result, query)
-            ))
 
         historyDAO.save(query, result)
     }
 
-    private fun downloadVideo(videoList: List<YoutubeVideo>): YoutubeVideo? {
+    private fun downloadVideo(userId: Int, jobId: String, query: String, videoList: List<YoutubeVideo>): YoutubeVideo? {
         for (video in videoList) {
-            val downloadedVideo = videoDownloadDAO.download(video)
-            if (downloadedVideo?.filename != null) {
-                return downloadedVideo
+            val currentVideo = videoDownloadDAO.initialize(video)
+            if (currentVideo != null) {
+                processedVideos.put(query,
+                    ProcessingJob(
+                        userId = userId,
+                        jobId = jobId,
+                        response = Mp3DownloadResponse.ModelMapper.from(currentVideo, query, currentVideo.youtubeDL)
+                    ))
+                val downloadedVideo = videoDownloadDAO.download(currentVideo)
+                if (downloadedVideo?.filename != null) {
+                    processedVideos.put(query,
+                        ProcessingJob(
+                            userId = userId,
+                            jobId = jobId,
+                            response = Mp3DownloadResponse.ModelMapper.from(downloadedVideo, query)
+                        ))
+                    return downloadedVideo
+                }
             }
         }
         return null

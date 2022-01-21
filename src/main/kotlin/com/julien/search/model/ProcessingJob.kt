@@ -6,5 +6,5 @@ import com.fasterxml.jackson.annotation.JsonInclude
 data class ProcessingJob(
     val jobId: String,
     val response: Mp3DownloadResponse? = null,
-    val userId: Int? = null
+    val userId: Int? = null,
 )
