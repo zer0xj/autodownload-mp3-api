@@ -52,11 +52,51 @@ GET /v1/user/{userId}/search/download?query={query}
 This endpoint searches YouTube, downloads the top hit, converts it to an MP3, and saves it to the location configured in application.yml:
 ```
 {
-  "filename": "Guess the Popular Song from 2010 - 2020 Music Quiz-tbfUQ8k9jzk.mp3",
-  "message": "Successfully downloaded https://www.youtube.com/watch?v=tbfUQ8k9jzk for search query[song name] as \"Adele - Hello-YQHsXMglC9A.mp3\"",
-  "query": "song name",
-  "url": "https://www.youtube.com/watch?v=tbfUQ8k9jzk"
+  "jobId": "ef802c0e-bea9-4975-bf0a-3f015b14d361"
 }
 ```
 &nbsp;
-
+```
+GET /v1/user/{userId}/search/download/status
+```
+This endpoint shows information for all of a user's running jobs:
+```
+[
+  {
+    "filename": "Home At Last-Hx5ZlTyzU-k.mp3",
+    "previouslyDownloaded": false,
+    "query": "steely dan home at last",
+    "success": true,
+    "url": "https://www.youtube.com/watch?v=Hx5ZlTyzU-k",
+    "message": "Successfully downloaded https://www.youtube.com/watch?v=Hx5ZlTyzU-k for search query[steely dan home at last] as \"Home At Last-Hx5ZlTyzU-k.mp3\""
+  }
+]
+```
+&nbsp;
+```
+GET /v1/user/{userId}/search/download/status/{jobId}
+```
+This endpoint shows information for a running job:
+```
+{
+  "filename": "Home At Last-Hx5ZlTyzU-k.mp3",
+  "previouslyDownloaded": false,
+  "query": "steely dan home at last",
+  "success": true,
+  "url": "https://www.youtube.com/watch?v=Hx5ZlTyzU-k",
+  "message": "Successfully downloaded https://www.youtube.com/watch?v=Hx5ZlTyzU-k for search query[steely dan home at last] as \"Home At Last-Hx5ZlTyzU-k.mp3\""
+}
+```
+&nbsp;
+```
+GET /v1/user/{userId}/search/download/summary
+```
+This endpoint shows a summary of running jobs:
+```
+{
+  "completed": 1,
+  "failed": 0,
+  "pending": 0
+}
+```
+&nbsp;
