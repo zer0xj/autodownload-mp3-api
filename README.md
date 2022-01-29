@@ -89,6 +89,17 @@ This endpoint shows information for a running job:
 ```
 &nbsp;
 ```
+DELETE /v1/user/{userId}/search/download/{jobId}
+```
+This endpoint cancels a running job:
+```
+{
+  "query": "steely dan home at last",
+  "message": "Failed to download an MP3 for search query[steely dan home at last]"
+}
+```
+&nbsp;
+```
 GET /v1/user/{userId}/search/download/summary
 ```
 This endpoint shows a summary of running jobs:

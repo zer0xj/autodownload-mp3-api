@@ -4,12 +4,28 @@ import com.sapher.youtubedl.YoutubeDLRequest
 
 class LocalYoutubeDLRequest(url: String? = null, directory: String? = null) : YoutubeDLRequest() {
 
+    private val options: MutableMap<String, String?> = HashMap()
+
     init {
         super.setUrl(url)
         super.setDirectory(directory)
+        // Add youtube-dl command-line options
+        setOption("add-metadata")
+        setOption("audio-format", "mp3")
+        setOption("audio-quality", "128K")
+        setOption("continue")
+        setOption("extract-audio")
+        setOption("format", "bestaudio")
+        setOption("ignore-errors")
+        setOption("no-call-home")
+        setOption("no-colors")
+        setOption("no-warnings")
+        setOption("prefer-avconv")
+        setOption("prefer-insecure")
+        setOption("retries", 10)
+        setOption("xattrs")
+        setOption("youtube-skip-dash-manifest")
     }
-
-    private val options: MutableMap<String, String?> = HashMap()
 
     public override fun buildOptions(): String {
         val builder = StringBuilder()

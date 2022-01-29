@@ -6,6 +6,8 @@ import com.julien.search.model.YoutubeVideo
 
 interface SearchService {
 
+    fun cancelJob(userId: Int, jobId: String): Mp3DownloadResponse?
+
     fun getJobStatus(userId: Int, jobId: String): Mp3DownloadResponse?
 
     fun getJobSummary(userId: Int): Map<String, Int>

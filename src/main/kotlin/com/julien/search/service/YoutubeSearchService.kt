@@ -36,36 +36,21 @@ class YoutubeSearchService : SearchService {
 
     private val logger: Logger = LoggerFactory.getLogger(this.javaClass.name)
 
-    override fun getJobStatus(userId: Int, jobId: String): Mp3DownloadResponse? {
+    override fun cancelJob(userId: Int, jobId: String): Mp3DownloadResponse? {
 
-        logger.debug("getJobStatus(userId=$userId, jobId=$jobId)")
+        logger.debug("cancelJob(userId=$userId, jobId=$jobId)")
 
-        val user = userDAO.validateUserName(userId)
+        val job = getProcessingJob(userId, jobId)
 
-        val filteredJobs: List<ProcessingJob> = processedVideos.asMap().values.filter { it.jobId == jobId }
+        logger.debug("Cancelling download job[$job] for jobId[$jobId]")
+        job?.cancel()
 
-        if (filteredJobs.isEmpty()) {
-            return null
-        } else if (filteredJobs.size > 1) {
-            val logMessage = "Found more than one job in cache for jobId[$jobId]: $filteredJobs. Returning first " +
-                    "value (if applicable) for user"
-            if (logger.isDebugEnabled) {
-                logger.warn("${logMessage}[$user].")
-            } else {
-                logger.warn("${logMessage}Id[$userId].")
-            }
-        }
-
-        val job = if (user.adminUser) {
-            filteredJobs.firstOrNull()
-        } else {
-            filteredJobs.firstOrNull { it.userId == userId }
-        }
-
-        logger.debug("getJobStatus(userId=$userId, jobId=$jobId) RESPONSE: ${job?.response}")
+        logger.debug("cancelJob(userId=$userId, jobId=$jobId) RESPONSE: ${job?.response}")
 
         return job?.response
     }
+
+    override fun getJobStatus(userId: Int, jobId: String): Mp3DownloadResponse? = getProcessingJob(userId, jobId)?.response
 
     override fun getJobSummary(userId: Int): Map<String, Int> {
 
@@ -125,10 +110,9 @@ class YoutubeSearchService : SearchService {
                 ProcessingJob(
                     userId = userId,
                     jobId = uuid,
-                    response = Mp3DownloadResponse(query = query)
+                    response = Mp3DownloadResponse(query = query),
+                    future = CompletableFuture.runAsync { asyncSearchAndDownload(userId, uuid, query) }
                 ))
-
-            CompletableFuture.runAsync { asyncSearchAndDownload(userId, uuid, query) }
 
             ProcessingJob(jobId = uuid)
         } else {
@@ -161,12 +145,22 @@ class YoutubeSearchService : SearchService {
         for (video in videoList) {
             val currentVideo = videoDownloadDAO.initialize(video)
             if (currentVideo != null) {
-                processedVideos.put(query,
-                    ProcessingJob(
-                        userId = userId,
-                        jobId = jobId,
-                        response = Mp3DownloadResponse.ModelMapper.from(currentVideo, query, currentVideo.youtubeDL)
-                    ))
+                val cachedJob = processedVideos.getIfPresent(query)
+                if (cachedJob != null) {
+                    // Stop downloading new videos if the parent job has been cancelled
+                    if (cachedJob.isCancelled()) {
+                        processedVideos.invalidate(query)
+                        break
+                    }
+                    processedVideos.put(query, cachedJob.copy(Mp3DownloadResponse.ModelMapper.from(currentVideo, query, currentVideo.youtubeDL)))
+                } else {
+                    processedVideos.put(query,
+                        ProcessingJob(
+                            userId = userId,
+                            jobId = jobId,
+                            response = Mp3DownloadResponse.ModelMapper.from(currentVideo, query, currentVideo.youtubeDL)
+                        ))
+                }
                 val downloadedVideo = videoDownloadDAO.download(currentVideo)
                 if (downloadedVideo?.filename != null) {
                     processedVideos.put(query,
@@ -180,6 +174,37 @@ class YoutubeSearchService : SearchService {
             }
         }
         return null
+    }
+
+    private fun getProcessingJob(userId: Int, jobId: String): ProcessingJob? {
+
+        logger.debug("getProcessingJob(userId=$userId, jobId=$jobId)")
+
+        val user = userDAO.validateUserName(userId)
+
+        val filteredJobs: List<ProcessingJob> = processedVideos.asMap().values.filter { it.jobId == jobId }
+
+        if (filteredJobs.isEmpty()) {
+            return null
+        } else if (filteredJobs.size > 1) {
+            val logMessage = "Found more than one job in cache for jobId[$jobId]: $filteredJobs. Returning first " +
+                    "value (if applicable) for user"
+            if (logger.isDebugEnabled) {
+                logger.warn("${logMessage}[$user].")
+            } else {
+                logger.warn("${logMessage}Id[$userId].")
+            }
+        }
+
+        val job = if (user.adminUser) {
+            filteredJobs.firstOrNull()
+        } else {
+            filteredJobs.firstOrNull { it.userId == userId }
+        }
+
+        logger.debug("getProcessingJob(userId=$userId, jobId=$jobId) RESPONSE: $job")
+
+        return job
     }
 
     private val STATUS_COMPLETE = "completed"

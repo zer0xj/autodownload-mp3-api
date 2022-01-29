@@ -48,23 +48,6 @@ class YoutubeVideoDownloadDAO : VideoDownloadDAO {
 
             val request = LocalYoutubeDLRequest(video.url, downloadLocation)
 
-            // Add youtube-dl command-line options
-            request.setOption("add-metadata")
-            request.setOption("audio-format", "mp3")
-            request.setOption("audio-quality", "128K")
-            request.setOption("continue")
-            request.setOption("extract-audio")
-            request.setOption("format", "bestaudio")
-            request.setOption("ignore-errors")
-            request.setOption("no-call-home")
-            request.setOption("no-colors")
-            request.setOption("no-warnings")
-            request.setOption("prefer-avconv")
-            request.setOption("prefer-insecure")
-            request.setOption("retries", 10)
-            request.setOption("xattrs")
-            request.setOption("youtube-skip-dash-manifest")
-
             return YoutubeVideo(
                 id = video.id,
                 previouslyDownloaded = false,

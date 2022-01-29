@@ -15,6 +15,17 @@ class SearchController {
     @Autowired
     private lateinit var searchService: SearchService
 
+    @ApiOperation(value = "Cancel a specific video download", notes =
+    """
+        Example request:
+        DELETE /v1/user/{userId}/search/download/{jobId}
+        (no body)
+    """)
+    @RequestMapping(value = ["/v1/user/{userId}/search/download/{jobId}"], method = [RequestMethod.DELETE])
+    @ResponseBody
+    fun cancelJob(@PathVariable("userId") userId: Int,
+                  @PathVariable("jobId") jobId: String): Mp3DownloadResponse? = searchService.cancelJob(userId, jobId)
+
     @ApiOperation(value = "Get summary of download statuses for your user", notes =
     """
         Example request:

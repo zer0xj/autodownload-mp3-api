@@ -9,11 +9,15 @@ import java.io.IOException
 
 class LocalYoutubeDL(private val request: LocalYoutubeDLRequest? = null, youtubeDlLocation: String? = null) : YoutubeDL() {
 
+    private var process: Process? = null
+
     private val stdoutBuffer = StringBuffer()
 
     init {
         setExecutablePath(youtubeDlLocation)
     }
+
+    fun cancel() = process?.destroyForcibly()
 
     @Throws(YoutubeDLException::class)
     fun execute(): YoutubeDLResponse = try {
@@ -22,20 +26,22 @@ class LocalYoutubeDL(private val request: LocalYoutubeDLRequest? = null, youtube
         val split = command.split(" ").toTypedArray()
         val processBuilder = ProcessBuilder(*split)
 
-        if (request.directory != null) processBuilder.directory(File(request.directory))
-        val process: Process = try {
+        if (request.directory != null) {
+            processBuilder.directory(File(request.directory))
+        }
+        process = try {
             processBuilder.start()
         } catch (e: IOException) {
             throw YoutubeDLException(e)
         }
-        val outStream = process.inputStream
-        val errStream = process.errorStream
+        val outStream = process!!.inputStream
+        val errStream = process!!.errorStream
         val stderrBuffer = StringBuffer()
         stdoutBuffer.append("] 0%")
         StreamGobbler(stdoutBuffer, outStream)
         StreamGobbler(stderrBuffer, errStream)
         val exitCode: Int = try {
-            process.waitFor()
+            process!!.waitFor()
         } catch (e: InterruptedException) {
             throw YoutubeDLException(e)
         }
