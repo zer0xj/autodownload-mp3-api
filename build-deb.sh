@@ -70,6 +70,7 @@ cp -v "$CONFIGFILE" "$DEB_TARGET/etc/julien/$PROJECT_NAME/"
 
 mkdir -pv "$DEB_TARGET/etc/systemd/system/"
 cp -v "$SERVICEFILE" "$DEB_TARGET/etc/systemd/system/"
+find "$DEB_TARGET/etc/systemd/system/" -maxdepth 1 -type f ! -perm 0700 -exec chmod 0644 {} \;
 
 mkdir -pv "$DEB_TARGET/DEBIAN/"
 printf "Package: $PROJECT_NAME\nVersion: $PROJECT_VERSION\nArchitecture: $ARCH\nMaintainer: Julien Neidballa\nDescription: Youtube to MP3 API\n" > "$DEB_TARGET/DEBIAN/control"
