@@ -10,9 +10,9 @@ interface SearchService {
 
     fun getJobStatus(userId: Int, jobId: String): Mp3DownloadResponse?
 
-    fun getJobSummary(userId: Int): Map<String, Int>
+    fun getJobStatuses(userId: Int): List<Mp3DownloadResponse>
 
-    fun getProcessingJobs(userId: Int): List<Mp3DownloadResponse>
+    fun getJobSummary(userId: Int): Map<String, Int>
 
     fun search(userId: Int, query: String): List<YoutubeVideo>
 

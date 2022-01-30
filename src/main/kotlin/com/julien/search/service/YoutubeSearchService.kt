@@ -52,21 +52,7 @@ class YoutubeSearchService : SearchService {
 
     override fun getJobStatus(userId: Int, jobId: String): Mp3DownloadResponse? = getProcessingJob(userId, jobId)?.response
 
-    override fun getJobSummary(userId: Int): Map<String, Int> {
-
-        logger.debug("getJobSummary(userId=$userId)")
-
-        val jobs = getProcessingJobs(userId).groupingBy { it.success }.eachCount()
-
-        val response = mapOf(STATUS_COMPLETE to (jobs[true] ?: 0), STATUS_FAILURE to (jobs[false] ?: 0),
-            STATUS_PENDING to (jobs[null] ?: 0))
-
-        logger.debug("getJobSummary(userId=$userId) RESPONSE: $response")
-
-        return response
-    }
-
-    override fun getProcessingJobs(userId: Int): List<Mp3DownloadResponse> {
+    override fun getJobStatuses(userId: Int): List<Mp3DownloadResponse> {
 
         logger.debug("getProcessingJobs(userId=$userId)")
 
@@ -79,6 +65,20 @@ class YoutubeSearchService : SearchService {
         }
 
         logger.debug("getProcessingJobs(userId=$userId) RESPONSE: $response")
+
+        return response
+    }
+
+    override fun getJobSummary(userId: Int): Map<String, Int> {
+
+        logger.debug("getJobSummary(userId=$userId)")
+
+        val jobs = getJobStatuses(userId).groupingBy { it.success }.eachCount()
+
+        val response = mapOf(STATUS_COMPLETE to (jobs[true] ?: 0), STATUS_FAILURE to (jobs[false] ?: 0),
+            STATUS_PENDING to (jobs[null] ?: 0))
+
+        logger.debug("getJobSummary(userId=$userId) RESPONSE: $response")
 
         return response
     }
@@ -102,9 +102,9 @@ class YoutubeSearchService : SearchService {
 
         val existingJob: ProcessingJob? = processedVideos.getIfPresent(query)
 
-        return if (existingJob == null) {
+        return if ((existingJob == null) || existingJob.isCancelled()) {
 
-            val uuid = UUID.randomUUID().toString()
+            val uuid = existingJob?.jobId ?: UUID.randomUUID().toString()
 
             processedVideos.put(query,
                 ProcessingJob(
@@ -149,7 +149,6 @@ class YoutubeSearchService : SearchService {
                 if (cachedJob != null) {
                     // Stop downloading new videos if the parent job has been cancelled
                     if (cachedJob.isCancelled()) {
-                        processedVideos.invalidate(query)
                         break
                     }
                     processedVideos.put(query, cachedJob.copy(Mp3DownloadResponse.ModelMapper.from(currentVideo, query, currentVideo.youtubeDL)))

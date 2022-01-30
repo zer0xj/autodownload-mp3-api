@@ -15,6 +15,7 @@ class LocalYoutubeDL(private val request: LocalYoutubeDLRequest? = null, youtube
 
     init {
         setExecutablePath(youtubeDlLocation)
+        stdoutBuffer.append("] 0%")
     }
 
     fun cancel() = process?.destroyForcibly()
@@ -37,7 +38,6 @@ class LocalYoutubeDL(private val request: LocalYoutubeDLRequest? = null, youtube
         val outStream = process!!.inputStream
         val errStream = process!!.errorStream
         val stderrBuffer = StringBuffer()
-        stdoutBuffer.append("] 0%")
         StreamGobbler(stdoutBuffer, outStream)
         StreamGobbler(stderrBuffer, errStream)
         val exitCode: Int = try {
