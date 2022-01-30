@@ -48,7 +48,7 @@ class SearchController {
     """)
     @RequestMapping(value = ["/v1/user/{userId}/search/download/status"], method = [RequestMethod.GET])
     @ResponseBody
-    fun getProcessingJobs(@PathVariable("userId") userId: Int): List<Mp3DownloadResponse> = searchService.getJobStatuses(userId)
+    fun getProcessingJobs(@PathVariable("userId") userId: Int): Map<String, Mp3DownloadResponse> = searchService.getJobStatuses(userId)
 
     @ApiOperation(value = "Get the status of a specific video download", notes =
     """

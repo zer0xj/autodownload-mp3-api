@@ -10,7 +10,7 @@ interface SearchService {
 
     fun getJobStatus(userId: Int, jobId: String): Mp3DownloadResponse?
 
-    fun getJobStatuses(userId: Int): List<Mp3DownloadResponse>
+    fun getJobStatuses(userId: Int): Map<String, Mp3DownloadResponse>
 
     fun getJobSummary(userId: Int): Map<String, Int>
 

@@ -52,19 +52,19 @@ class YoutubeSearchService : SearchService {
 
     override fun getJobStatus(userId: Int, jobId: String): Mp3DownloadResponse? = getProcessingJob(userId, jobId)?.response
 
-    override fun getJobStatuses(userId: Int): List<Mp3DownloadResponse> {
+    override fun getJobStatuses(userId: Int): Map<String, Mp3DownloadResponse> {
 
-        logger.debug("getProcessingJobs(userId=$userId)")
+        logger.debug("getJobStatuses(userId=$userId)")
 
         val user = userDAO.validateUserName(userId)
 
         val response = if (user.adminUser) {
-            processedVideos.asMap().values.mapNotNull { it.response }.toList()
+            processedVideos.asMap().values.filter { it.response != null }.mapNotNull { it.jobId to it.response!! }.toMap()
         } else {
-            processedVideos.asMap().values.filter { it.userId == userId }.mapNotNull { it.response }.toList()
+            processedVideos.asMap().values.filter { it.userId == userId }.filter { it.response != null }.mapNotNull { it.jobId to it.response!! }.toMap()
         }
 
-        logger.debug("getProcessingJobs(userId=$userId) RESPONSE: $response")
+        logger.debug("getJobStatuses(userId=$userId) RESPONSE: $response")
 
         return response
     }
@@ -73,7 +73,7 @@ class YoutubeSearchService : SearchService {
 
         logger.debug("getJobSummary(userId=$userId)")
 
-        val jobs = getJobStatuses(userId).groupingBy { it.success }.eachCount()
+        val jobs = getJobStatuses(userId).values.groupingBy { it.success }.eachCount()
 
         val response = mapOf(STATUS_COMPLETE to (jobs[true] ?: 0), STATUS_FAILURE to (jobs[false] ?: 0),
             STATUS_PENDING to (jobs[null] ?: 0))
