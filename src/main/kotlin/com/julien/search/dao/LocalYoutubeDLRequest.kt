@@ -30,14 +30,15 @@ class LocalYoutubeDLRequest(url: String? = null, directory: String? = null) : Yo
     public override fun buildOptions(): String {
         val builder = StringBuilder()
 
-        if (url != null) builder.append("$url ")
+        if (url != null) {
+            builder.append("$url ")
+        }
 
-        val it: MutableIterator<*> = options.entries.iterator()
+        val it: Iterator<Map.Entry<String, String?>> = options.entries.iterator()
         while (it.hasNext()) {
-            val (key, value) = it.next() as Map.Entry<String, String?>
+            val (key, value) = it.next()
             val optionFormatted = String.format("--%s %s", key, value ?: "").trim { it <= ' ' }
             builder.append("$optionFormatted ")
-            it.remove()
         }
         return builder.toString().trim { it <= ' ' }
     }
