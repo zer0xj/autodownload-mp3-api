@@ -66,9 +66,8 @@ This endpoint shows information for all of a user's running jobs:
     "filename": "Home At Last-Hx5ZlTyzU-k.mp3",
     "previouslyDownloaded": false,
     "query": "steely dan home at last",
-    "success": true,
-    "url": "https://www.youtube.com/watch?v=Hx5ZlTyzU-k",
-    "message": "Successfully downloaded https://www.youtube.com/watch?v=Hx5ZlTyzU-k for search query[steely dan home at last] as \"Home At Last-Hx5ZlTyzU-k.mp3\""
+    "status": "completed",
+    "url": "https://www.youtube.com/watch?v=Hx5ZlTyzU-k"
   }
 ]
 ```
@@ -82,9 +81,8 @@ This endpoint shows information for a running job:
   "filename": "Home At Last-Hx5ZlTyzU-k.mp3",
   "previouslyDownloaded": false,
   "query": "steely dan home at last",
-  "success": true,
-  "url": "https://www.youtube.com/watch?v=Hx5ZlTyzU-k",
-  "message": "Successfully downloaded https://www.youtube.com/watch?v=Hx5ZlTyzU-k for search query[steely dan home at last] as \"Home At Last-Hx5ZlTyzU-k.mp3\""
+  "status": "completed",
+  "url": "https://www.youtube.com/watch?v=Hx5ZlTyzU-k"
 }
 ```
 &nbsp;
@@ -94,8 +92,11 @@ DELETE /v1/user/{userId}/search/download/{jobId}
 This endpoint cancels a running job:
 ```
 {
+  "filename": "Home At Last-Hx5ZlTyzU-k.mp3",
+  "previouslyDownloaded": false,
   "query": "steely dan home at last",
-  "message": "Failed to download an MP3 for search query[steely dan home at last]"
+  "status": "cancelled",
+  "url": "https://www.youtube.com/watch?v=Hx5ZlTyzU-k"
 }
 ```
 &nbsp;
@@ -105,9 +106,11 @@ GET /v1/user/{userId}/search/download/summary
 This endpoint shows a summary of running jobs:
 ```
 {
+  "cancelled": 1,
   "completed": 1,
   "failed": 0,
-  "pending": 0
+  "pending": 0,
+  "processing": 0
 }
 ```
 &nbsp;

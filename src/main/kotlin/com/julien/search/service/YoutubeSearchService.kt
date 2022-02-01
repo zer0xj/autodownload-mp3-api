@@ -76,9 +76,11 @@ class YoutubeSearchService : SearchService {
 
         val response = let {
             val counts = getJobStatuses(userId).values.groupingBy { it.getStatus() }.eachCount()
-            return@let mapOf(Constants.STATUS_COMPLETE to (counts[Constants.STATUS_COMPLETE] ?: 0),
+            return@let mapOf(Constants.STATUS_CANCELLED to (counts[Constants.STATUS_CANCELLED] ?: 0),
+                Constants.STATUS_COMPLETE to (counts[Constants.STATUS_COMPLETE] ?: 0),
                 Constants.STATUS_FAILURE to (counts[Constants.STATUS_FAILURE] ?: 0),
-                Constants.STATUS_PENDING to (counts[Constants.STATUS_PENDING] ?: 0))
+                Constants.STATUS_PENDING to (counts[Constants.STATUS_PENDING] ?: 0),
+                Constants.STATUS_PROCESSING to (counts[Constants.STATUS_PROCESSING] ?: 0))
         }
 
         logger.debug("getJobSummary(userId=$userId) RESPONSE: $response")

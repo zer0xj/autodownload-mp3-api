@@ -8,66 +8,38 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class Mp3DownloadResponse(
+    @JsonIgnore
     val cancelled: AtomicBoolean = AtomicBoolean(false),
     val filename: String? = null,
     val previouslyDownloaded: Boolean? = null,
     val query: String? = null,
+    @JsonIgnore
     val success: Boolean? = null,
     val url: String? = null,
     @JsonIgnore
     val youtubeDL: LocalYoutubeDL? = null
 ) {
-    @JsonProperty("message")
-    fun getMessage(): String {
-        return when (this.success) {
-            true -> {
-                if (cancelled.get()) {
-                    "Download cancelled of "
-                } else {
-                    if (getProgress() != null) {
-                        "Currently downloading "
-                    } else {
-                        if (this.previouslyDownloaded == true) {
-                            "Previously "
-                        } else {
-                            "Successfully "
-                        } + "downloaded "
-                    }
-                } + "${this.url} for search query \"$query\"" +
-                        if (this.filename != null) {
-                            " as \"${this.filename}\""
-                        } else {
-                            ""
-                        }
-            }
-            false -> {
-                "Failed to download an MP3 for search query[$query]"
-            }
-            else -> {
-                "Currently processing search query[$query]"
-            }
-        }
-    }
 
     @JsonProperty("progress")
     fun getProgress() = youtubeDL?.getProgress()
 
+    @JsonProperty("status")
     fun getStatus(): String =
         when (this.success) {
-            false -> {
-                Constants.STATUS_FAILURE
-            }
-            null -> {
-                Constants.STATUS_PENDING
-            }
-            else -> {
+            true -> {
                 if (this.cancelled.get()) {
-                    Constants.STATUS_FAILURE
+                    Constants.STATUS_CANCELLED
                 } else if (this.getProgress() != null) {
                     Constants.STATUS_PENDING
                 } else {
                     Constants.STATUS_COMPLETE
                 }
+            }
+            false -> {
+                Constants.STATUS_FAILURE
+            }
+            else -> {
+                Constants.STATUS_PROCESSING
             }
         }
 
