@@ -52,6 +52,25 @@ data class Mp3DownloadResponse(
     @JsonProperty("progress")
     fun getProgress() = youtubeDL?.getProgress()
 
+    fun getStatus(): String =
+        when (this.success) {
+            false -> {
+                Constants.STATUS_FAILURE
+            }
+            null -> {
+                Constants.STATUS_PENDING
+            }
+            else -> {
+                if (this.cancelled.get()) {
+                    Constants.STATUS_FAILURE
+                } else if (this.getProgress() != null) {
+                    Constants.STATUS_PENDING
+                } else {
+                    Constants.STATUS_COMPLETE
+                }
+            }
+        }
+
     object ModelMapper {
         fun from(youtubeVideo: YoutubeVideo?, query: String, youtubeDL: LocalYoutubeDL? = null) =
             Mp3DownloadResponse(

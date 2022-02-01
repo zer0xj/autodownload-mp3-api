@@ -5,6 +5,7 @@ import com.julien.search.dao.HistoryDAO
 import com.julien.search.dao.SearchDAO
 import com.julien.search.dao.UserDAO
 import com.julien.search.dao.VideoDownloadDAO
+import com.julien.search.model.Constants
 import com.julien.search.model.Mp3DownloadResponse
 import com.julien.search.model.ProcessingJob
 import com.julien.search.model.YoutubeVideo
@@ -73,10 +74,12 @@ class YoutubeSearchService : SearchService {
 
         logger.debug("getJobSummary(userId=$userId)")
 
-        val jobs = getJobStatuses(userId).values.groupingBy { it.success }.eachCount()
-
-        val response = mapOf(STATUS_COMPLETE to (jobs[true] ?: 0), STATUS_FAILURE to (jobs[false] ?: 0),
-            STATUS_PENDING to (jobs[null] ?: 0))
+        val response = let {
+            val counts = getJobStatuses(userId).values.groupingBy { it.getStatus() }.eachCount()
+            return@let mapOf(Constants.STATUS_COMPLETE to (counts[Constants.STATUS_COMPLETE] ?: 0),
+                Constants.STATUS_FAILURE to (counts[Constants.STATUS_FAILURE] ?: 0),
+                Constants.STATUS_PENDING to (counts[Constants.STATUS_PENDING] ?: 0))
+        }
 
         logger.debug("getJobSummary(userId=$userId) RESPONSE: $response")
 
@@ -205,8 +208,4 @@ class YoutubeSearchService : SearchService {
 
         return job
     }
-
-    private val STATUS_COMPLETE = "completed"
-    private val STATUS_FAILURE = "failed"
-    private val STATUS_PENDING = "pending"
 }
