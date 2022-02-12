@@ -2,7 +2,7 @@ package com.julien.search.dao
 
 import com.sapher.youtubedl.YoutubeDLRequest
 
-class LocalYoutubeDLRequest(url: String? = null, directory: String? = null) : YoutubeDLRequest() {
+class LocalYoutubeDLRequest(url: String? = null, directory: String) : YoutubeDLRequest() {
 
     private val options: MutableMap<String, String?> = HashMap()
 

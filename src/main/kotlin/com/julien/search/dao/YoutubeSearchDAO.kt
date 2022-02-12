@@ -1,11 +1,10 @@
 package com.julien.search.dao
 
-import com.google.api.client.http.HttpRequest
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.SearchResult
-import com.julien.search.model.*
+import com.julien.search.model.YoutubeVideo
 import org.apache.commons.lang3.StringEscapeUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

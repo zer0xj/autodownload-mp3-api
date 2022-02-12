@@ -1,5 +1,6 @@
 package com.julien.search
 
+import com.julien.search.model.YoutubeVideo
 import org.assertj.core.api.Assertions
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -8,14 +9,14 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
-import org.springframework.http.MediaType
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.web.client.RestTemplate
 
+import java.nio.charset.StandardCharsets
+
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, properties = "database.login.enableUserValidation=false")
 class SearchYoutubeApplicationTests {
 
     @Autowired
@@ -27,30 +28,22 @@ class SearchYoutubeApplicationTests {
     private final ParameterizedTypeReference<Map<String, Object>> genericResponseType =
             new ParameterizedTypeReference<HashMap<String, Object>>() {}
 
-    private static HttpHeaders getHeaders(long userId) {
-        HttpHeaders headers = getBaseHeaders()
-        return headers
-    }
-
-    private static HttpHeaders getBaseHeaders() {
-        HttpHeaders headers = new HttpHeaders()
-        headers.setContentType(MediaType.APPLICATION_JSON)
-        return headers
-    }
+    String searchQuery = "Home at Last"
+    int testUserId = 1234
 
     @Test
-    void paymentControllerTest1() {
-
-        // Get a user's payment types
-
-        String paymentMethods = ""
+    void searchControllerTest1() {
 
         HttpEntity<String> httpEntity = new HttpEntity()
 
+        String url = "http://localhost:$localport/v1/user/$testUserId/search?query=" + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8)
+
+        List<YoutubeVideo> videos = Collections.emptyList()
+
         try {
-            paymentMethods = Arrays.asList(this.restTemplate.exchange("http://localhost:$localport/v1/$failureUserId/paymentmethods", HttpMethod.POST,
-                    httpEntity, String.class).getBody())
+            videos = Arrays.asList(this.restTemplate.exchange(url, HttpMethod.GET, httpEntity,
+                    YoutubeVideo[].class).getBody())
         } catch (Exception ignored) {}
-        Assertions.assertThat(paymentMethods.length() == 0)
+        Assertions.assertThat(videos.size() != 0)
     }
 }

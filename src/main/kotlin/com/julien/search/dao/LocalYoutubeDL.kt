@@ -27,13 +27,13 @@ class LocalYoutubeDL(private val request: LocalYoutubeDLRequest? = null, youtube
         val split = command.split(" ").toTypedArray()
         val processBuilder = ProcessBuilder(*split)
 
-        if (request.directory != null) {
-            processBuilder.directory(File(request.directory))
-        }
         process = try {
+            processBuilder.directory(File(request.directory ?: error("download directory cannot be null")))
             processBuilder.start()
         } catch (e: IOException) {
             throw YoutubeDLException(e)
+        } catch (i: IllegalStateException) {
+            throw YoutubeDLException(i)
         }
         val outStream = process!!.inputStream
         val errStream = process!!.errorStream
