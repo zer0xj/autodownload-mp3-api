@@ -1,4 +1,4 @@
-package com.julien.search.controller
+package com.julien.search
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.cache.Cache
