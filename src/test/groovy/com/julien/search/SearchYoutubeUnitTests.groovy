@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
         properties = [ "database.login.enableUserValidation=false", "downloads.location=./build/tmp", "history.location=./build/tmp" ])
-class SearchYoutubeApplicationTests {
+class SearchYoutubeUnitTests {
 
     @Autowired
     private RestTemplate restTemplate = new RestTemplate()

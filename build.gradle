@@ -1,7 +1,7 @@
 buildscript {
 	ext {
 		kotlinVersion = '1.5.31'
-		springBootVersion = '2.5.2'
+		springBootVersion = '2.5.3'
 	}
 	repositories {
 		mavenCentral()
@@ -25,7 +25,7 @@ apply plugin: 'jacoco'
 apply plugin: 'kotlin-jpa'
 
 group = 'com.julien.search'
-version = '0.1.6'
+version = '0.1.7'
 
 repositories {
 	mavenCentral()
@@ -57,8 +57,12 @@ dependencies {
 	implementation group: 'com.google.guava', name: 'guava', version: '31.0.1-jre'
 	implementation 'mysql:mysql-connector-java'
 	testImplementation 'org.codehaus.groovy:groovy'
-	testImplementation 'junit:junit:4.12'
+	testImplementation 'org.jetbrains.kotlin:kotlin-stdlib'
+	testImplementation 'org.jetbrains.kotlin:kotlin-reflect'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'junit:junit:4.12'
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.5.2'
+	testImplementation 'com.github.tomakehurst:wiremock-jre8:2.27.2'
 }
 
 java {
@@ -69,6 +73,10 @@ java {
 
 jacoco {
 	toolVersion = "0.8.7"
+}
+
+test {
+	useJUnitPlatform()
 }
 
 jacocoTestReport {
