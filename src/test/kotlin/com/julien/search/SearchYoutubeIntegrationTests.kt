@@ -24,16 +24,18 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.MockMvc
 import java.util.UUID
-
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 
 @ExtendWith(SpringExtension::class)
 @WebMvcTest(SearchController::class)
 @ContextConfiguration(classes = [
     DefaultUserDAO::class,
-    LocalHistoryDAO::class,
     JdbcUserRepository::class,
+    LocalHistoryDAO::class,
     YoutubeSearchDAO::class,
-    YoutubeSearchService::class])
+    YoutubeSearchService::class,
+    YoutubeVideoDownloadDAO::class])
 class SearchYoutubeIntegrationTests {
 
     @Autowired
@@ -111,5 +113,20 @@ class SearchYoutubeIntegrationTests {
     fun `searchService download functionality for videos already downloaded`() {
         BDDMockito.given(processedVideos.getIfPresent(searchQuery)).willReturn(getProcessingJob(true))
         Assertions.assertNotNull(searchService.searchAndDownload(testUserId, searchQuery).jobId)
+    }
+
+    @Test
+    fun `searchService download status functionality for videos already downloaded`() {
+        val downloadedVideoJob = getProcessingJob(true)
+        BDDMockito.given(processedVideos.getIfPresent(searchQuery)).willReturn(downloadedVideoJob)
+        BDDMockito.given(processedVideos.asMap()).willReturn(
+            let {
+                val c = ConcurrentHashMap<String, ProcessingJob>()
+                c[searchQuery] = downloadedVideoJob
+                return@let c
+            })
+        val result = searchService.getJobStatus(testUserId, downloadedVideoJob.jobId)
+        Assertions.assertNotNull(result)
+        Assertions.assertEquals(downloadedVideoJob.response, result)
     }
 }
