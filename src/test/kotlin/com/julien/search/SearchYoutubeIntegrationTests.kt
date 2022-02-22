@@ -1,11 +1,10 @@
 package com.julien.search
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.cache.Cache
-import com.julien.search.controller.v1.SearchController
 import com.julien.search.dao.*
 import com.julien.search.model.*
 import com.julien.search.repository.JdbcUserRepository
+import com.julien.search.service.SearchService
 import com.julien.search.service.YoutubeSearchService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -28,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
 @ExtendWith(SpringExtension::class)
-@WebMvcTest(SearchController::class)
+@WebMvcTest(SearchService::class)
 @ContextConfiguration(classes = [
     DefaultUserDAO::class,
     JdbcUserRepository::class,

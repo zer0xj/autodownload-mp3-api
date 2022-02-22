@@ -1,22 +1,21 @@
 package com.julien.search
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.julien.search.model.YoutubeVideo
-import org.assertj.core.api.Assertions
-import org.junit.Test
-import org.junit.runner.RunWith
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
-import org.springframework.test.context.junit4.SpringRunner
+import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.client.RestTemplate
 
 import java.nio.charset.StandardCharsets
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT,
         properties = [ "database.login.enableUserValidation=false", "downloads.location=./build/tmp", "history.location=./build/tmp" ])
 class SearchYoutubeUnitTests {
@@ -27,8 +26,6 @@ class SearchYoutubeUnitTests {
     @LocalServerPort
     private String localport
 
-    private ObjectMapper mapper
-
     private final ParameterizedTypeReference<Map<String, Object>> genericResponseType =
             new ParameterizedTypeReference<HashMap<String, Object>>() {}
 
@@ -38,8 +35,6 @@ class SearchYoutubeUnitTests {
     @Test
     void searchControllerTest1() {
 
-        HttpEntity<String> httpEntity = new HttpEntity()
-
         // Test search endpoint
 
         String url = "http://localhost:$localport/v1/user/$testUserId/search?query=" + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8)
@@ -47,16 +42,14 @@ class SearchYoutubeUnitTests {
         List<YoutubeVideo> videos = Collections.emptyList()
 
         try {
-            videos = Arrays.asList(this.restTemplate.exchange(url, HttpMethod.GET, httpEntity,
+            videos = Arrays.asList(this.restTemplate.exchange(url, HttpMethod.GET, HttpEntity.EMPTY,
                     YoutubeVideo[].class).getBody())
         } catch (Exception ignored) {}
-        Assertions.assertThat(videos.size() != 0)
+        Assertions.assertNotEquals(0, videos.size())
     }
 
     @Test
     void searchControllerTest2() {
-
-        HttpEntity<String> httpEntity = new HttpEntity()
 
         // Test download endpoint
 
@@ -66,9 +59,9 @@ class SearchYoutubeUnitTests {
 
         try {
             // Doing this because Jackson/Kotlin is annoying with deserializing non-nullable fields in data classes
-            jobId = this.restTemplate.exchange(url, HttpMethod.GET, httpEntity, genericResponseType).getBody().get("jobId").toString()
+            jobId = this.restTemplate.exchange(url, HttpMethod.GET, HttpEntity.EMPTY, genericResponseType).getBody().get("jobId").toString()
         } catch (Exception ignored) {}
-        Assertions.assertThat(jobId != null)
+        Assertions.assertNotEquals(null, jobId)
 
         // Test all jobs' statuses endpoint
 
@@ -77,9 +70,10 @@ class SearchYoutubeUnitTests {
         Integer jobCount = 0
 
         try {
-            jobCount = this.restTemplate.exchange(url, HttpMethod.GET, httpEntity, genericResponseType).getBody().size()
+            jobCount = this.restTemplate.exchange(url, HttpMethod.GET, HttpEntity.EMPTY, genericResponseType).getBody().size()
         } catch (Exception ignored) {}
-        Assertions.assertThat((jobCount != null) && (jobCount > 0))
+        Assertions.assertNotEquals(null, jobCount)
+        Assertions.assertTrue(jobCount > 0)
 
         // Test a single job's status endpoint
 
@@ -92,7 +86,7 @@ class SearchYoutubeUnitTests {
             if ((status == null) || (status != "processing")) break
         }
 
-        Assertions.assertThat(status != null)
+        Assertions.assertNotEquals(null, status)
 
         // Test cancellation endpoint
 
@@ -101,21 +95,19 @@ class SearchYoutubeUnitTests {
         status = null
 
         try {
-            status = this.restTemplate.exchange(url, HttpMethod.DELETE, httpEntity, genericResponseType).getBody().get("status")
+            status = this.restTemplate.exchange(url, HttpMethod.DELETE, HttpEntity.EMPTY, genericResponseType).getBody().get("status")
         } catch (Exception ignored) {}
-        Assertions.assertThat(status != null)
+        Assertions.assertNotEquals(null, status)
     }
 
     private String getJobStatus(String url) {
-
-        HttpEntity<String> httpEntity = new HttpEntity()
 
         Thread.sleep(200)
 
         String status = null
 
         try {
-            status = this.restTemplate.exchange(url, HttpMethod.GET, httpEntity, genericResponseType).getBody().get("status")
+            status = this.restTemplate.exchange(url, HttpMethod.GET, HttpEntity.EMPTY, genericResponseType).getBody().get("status")
         } catch (Exception ignored) {}
 
         return status
@@ -123,8 +115,6 @@ class SearchYoutubeUnitTests {
 
     @Test
     void searchControllerTest3() {
-
-        HttpEntity<String> httpEntity = new HttpEntity()
 
         // Test job summary endpoint
 
@@ -134,8 +124,8 @@ class SearchYoutubeUnitTests {
 
         try {
             // Doing this because Jackson/Kotlin is annoying with deserializing non-nullable fields in data classes
-            summary = this.restTemplate.exchange(url, HttpMethod.GET, httpEntity, genericResponseType).getBody()
+            summary = this.restTemplate.exchange(url, HttpMethod.GET, HttpEntity.EMPTY, genericResponseType).getBody()
         } catch (Exception ignored) {}
-        Assertions.assertThat(!summary.isEmpty())
+        Assertions.assertFalse(summary.isEmpty())
     }
 }

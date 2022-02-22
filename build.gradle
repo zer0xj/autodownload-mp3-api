@@ -25,7 +25,7 @@ apply plugin: 'jacoco'
 apply plugin: 'kotlin-jpa'
 
 group = 'com.julien.search'
-version = '0.1.7'
+version = '0.1.8'
 
 repositories {
 	mavenCentral()
@@ -60,7 +60,6 @@ dependencies {
 	testImplementation 'org.jetbrains.kotlin:kotlin-stdlib'
 	testImplementation 'org.jetbrains.kotlin:kotlin-reflect'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'junit:junit:4.12'
 	testImplementation 'org.junit.jupiter:junit-jupiter:5.5.2'
 	testImplementation 'com.github.tomakehurst:wiremock-jre8:2.27.2'
 }
@@ -75,7 +74,7 @@ jacoco {
 	toolVersion = "0.8.7"
 }
 
-test {
+tasks.withType(Test) {
 	useJUnitPlatform()
 }
 
