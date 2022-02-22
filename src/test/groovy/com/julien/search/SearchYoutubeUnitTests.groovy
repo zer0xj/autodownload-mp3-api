@@ -2,6 +2,7 @@ package com.julien.search
 
 import com.julien.search.model.YoutubeVideo
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,12 +33,14 @@ class SearchYoutubeUnitTests {
     String searchQuery = "Home at Last"
     int testUserId = 1234
 
+    static String jobId = null
+
     @Test
+    @DisplayName("searchController search endpoint")
     void searchControllerTest1() {
 
-        // Test search endpoint
-
-        String url = "http://localhost:$localport/v1/user/$testUserId/search?query=" + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8)
+        String url = "http://localhost:$localport/v1/user/$testUserId/search?query=" +
+                URLEncoder.encode(searchQuery, StandardCharsets.UTF_8.name())
 
         List<YoutubeVideo> videos = Collections.emptyList()
 
@@ -49,13 +52,13 @@ class SearchYoutubeUnitTests {
     }
 
     @Test
+    @DisplayName("searchController search and download endpoint")
     void searchControllerTest2() {
 
-        // Test download endpoint
+        String url = "http://localhost:$localport/v1/user/$testUserId/search/download?query=" +
+                URLEncoder.encode(searchQuery, StandardCharsets.UTF_8.name())
 
-        String url = "http://localhost:$localport/v1/user/$testUserId/search/download?query=" + URLEncoder.encode(searchQuery, StandardCharsets.UTF_8)
-
-        String jobId = null
+        jobId = null
 
         try {
             // Doing this because Jackson/Kotlin is annoying with deserializing non-nullable fields in data classes
@@ -63,9 +66,13 @@ class SearchYoutubeUnitTests {
         } catch (Exception ignored) {}
         Assertions.assertNotEquals(null, jobId)
 
-        // Test all jobs' statuses endpoint
+    }
 
-        url = "http://localhost:$localport/v1/user/$testUserId/search/download/status"
+    @Test
+    @DisplayName("searchController all jobs' statuses endpoint")
+    void searchControllerTest3() {
+
+        String url = "http://localhost:$localport/v1/user/$testUserId/search/download/status"
 
         Integer jobCount = 0
 
@@ -75,9 +82,13 @@ class SearchYoutubeUnitTests {
         Assertions.assertNotEquals(null, jobCount)
         Assertions.assertTrue(jobCount > 0)
 
-        // Test a single job's status endpoint
+    }
 
-        url = "$url/$jobId"
+    @Test
+    @DisplayName("searchController single job's status endpoint")
+    void searchControllerTest4() {
+
+        String url = "http://localhost:$localport/v1/user/$testUserId/search/download/status/$jobId"
 
         String status = null
 
@@ -88,11 +99,15 @@ class SearchYoutubeUnitTests {
 
         Assertions.assertNotEquals(null, status)
 
-        // Test cancellation endpoint
+    }
 
-        url = "http://localhost:$localport/v1/user/$testUserId/search/download/$jobId"
+    @Test
+    @DisplayName("searchController job cancellation endpoint")
+    void searchControllerTest5() {
 
-        status = null
+        String url = "http://localhost:$localport/v1/user/$testUserId/search/download/$jobId"
+
+        String status = null
 
         try {
             status = this.restTemplate.exchange(url, HttpMethod.DELETE, HttpEntity.EMPTY, genericResponseType).getBody().get("status")
@@ -114,9 +129,8 @@ class SearchYoutubeUnitTests {
     }
 
     @Test
-    void searchControllerTest3() {
-
-        // Test job summary endpoint
+    @DisplayName("searchController job summary endpoint")
+    void searchControllerTest6() {
 
         String url = "http://localhost:$localport/v1/user/$testUserId/search/download/summary"
 
