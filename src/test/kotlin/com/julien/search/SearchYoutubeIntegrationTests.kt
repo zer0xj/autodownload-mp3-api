@@ -69,19 +69,24 @@ class SearchYoutubeIntegrationTests {
     val testUserId = 1234
 
     // Helper functions
-    private fun getMp3DownloadResponse(previouslyDownloaded: Boolean? = null, success: Boolean? = true, cancelled: Boolean? = null, queryIndex: Int? = null) =
+    private fun getMp3DownloadResponse(previouslyDownloaded: Boolean? = null, success: Boolean? = true,
+                                       cancelled: Boolean? = null, createYoutubeDL: Boolean? = null, queryIndex: Int? = null) =
         Mp3DownloadResponse(
             cancelled = AtomicBoolean(cancelled ?: false),
             filename = searchQuery + (queryIndex?.toString() ?: "") + ".mp3",
             previouslyDownloaded = previouslyDownloaded ?: false,
             query = searchQuery + (queryIndex?.toString() ?: ""),
-            success = success)
+            success = success,
+            youtubeDL = if (createYoutubeDL == true) LocalYoutubeDL() else null
+        )
 
-    private fun getProcessingJob(previouslyDownloaded: Boolean? = null, success: Boolean? = true, cancelled: Boolean? = null, queryIndex: Int? = null) = ProcessingJob(
-        jobId = UUID.randomUUID().toString(),
-        response = getMp3DownloadResponse(previouslyDownloaded, success, cancelled, queryIndex),
-        userId = testUserId
-    )
+    private fun getProcessingJob(previouslyDownloaded: Boolean? = null, success: Boolean? = true,
+                                 cancelled: Boolean? = null, createYoutubeDL: Boolean? = null, queryIndex: Int? = null) =
+        ProcessingJob(
+            jobId = UUID.randomUUID().toString(),
+            response = getMp3DownloadResponse(previouslyDownloaded, success, cancelled, createYoutubeDL, queryIndex),
+            userId = testUserId
+        )
 
     private fun setupMultipleJobs() {
         BDDMockito.given(processedVideos.asMap()).willReturn(
@@ -105,30 +110,25 @@ class SearchYoutubeIntegrationTests {
     }
 
     @Test
-    fun `userRepository when user is found`() {
-        val result = userRepository.selectUserByUserName(testUserId)
-        Assertions.assertNotNull(result.userName)
-    }
-
-    @Test
-    fun `userRepository when user is not found`() {
-        BDDMockito.given(mySql.queryForList(anyString(), any(MapSqlParameterSource::class.java))).willReturn(emptyList())
-        Assertions.assertEquals(userRepository.selectUserByUserName(testUserId), User())
-    }
-
-    @Test
-    fun `searchService job summary functionality`() {
-        setupMultipleJobs()
-        val result = searchService.getJobSummary(testUserId)
+    fun `searchService cancel functionality`() {
+        val pendingVideoJob = getProcessingJob(createYoutubeDL = true)
+        BDDMockito.given(processedVideos.getIfPresent(searchQuery)).willReturn(pendingVideoJob)
+        BDDMockito.given(processedVideos.asMap()).willReturn(
+            let {
+                val output = ConcurrentHashMap<String, ProcessingJob>()
+                output[searchQuery] = pendingVideoJob
+                return@let output
+            })
+        val result = searchService.cancelJob(testUserId, pendingVideoJob.jobId)
         Assertions.assertNotNull(result)
-        Assertions.assertEquals(
-            mapOf(
-                Constants.STATUS_CANCELLED to 2,
-                Constants.STATUS_COMPLETE to 2,
-                Constants.STATUS_FAILURE to 1,
-                Constants.STATUS_PENDING to 0,
-                Constants.STATUS_PROCESSING to 1),
-            result)
+        Assertions.assertEquals(pendingVideoJob.response, result)
+        Assertions.assertTrue(result!!.cancelled.get())
+    }
+
+    @Test
+    fun `searchService download functionality for videos already downloaded`() {
+        BDDMockito.given(processedVideos.getIfPresent(searchQuery)).willReturn(getProcessingJob(true))
+        Assertions.assertNotNull(searchService.searchAndDownload(testUserId, searchQuery).jobId)
     }
 
     @Test
@@ -155,14 +155,41 @@ class SearchYoutubeIntegrationTests {
     }
 
     @Test
+    fun `searchService failure when user cannot be found`() {
+        BDDMockito.given(mySql.queryForList(anyString(), any(MapSqlParameterSource::class.java))).willReturn(emptyList())
+        Assertions.assertThrows(DAOException::class.java) { searchService.search(testUserId, searchQuery) }
+    }
+
+    @Test
+    fun `searchService job summary functionality`() {
+        setupMultipleJobs()
+        val result = searchService.getJobSummary(testUserId)
+        Assertions.assertNotNull(result)
+        Assertions.assertEquals(
+            mapOf(
+                Constants.STATUS_CANCELLED to 2,
+                Constants.STATUS_COMPLETE to 2,
+                Constants.STATUS_FAILURE to 1,
+                Constants.STATUS_PENDING to 0,
+                Constants.STATUS_PROCESSING to 1),
+            result)
+    }
+
+    @Test
     fun `searchService search functionality`() {
         BDDMockito.given(searchDAO.search(anyString())).willReturn(listOf(YoutubeVideo(title = searchQuery)))
         Assertions.assertEquals(searchService.search(testUserId, searchQuery).isEmpty(), false)
     }
 
     @Test
-    fun `searchService download functionality for videos already downloaded`() {
-        BDDMockito.given(processedVideos.getIfPresent(searchQuery)).willReturn(getProcessingJob(true))
-        Assertions.assertNotNull(searchService.searchAndDownload(testUserId, searchQuery).jobId)
+    fun `userRepository when user is found`() {
+        val result = userRepository.selectUserByUserName(testUserId)
+        Assertions.assertNotNull(result.userName)
+    }
+
+    @Test
+    fun `userRepository when user is not found`() {
+        BDDMockito.given(mySql.queryForList(anyString(), any(MapSqlParameterSource::class.java))).willReturn(emptyList())
+        Assertions.assertEquals(userRepository.selectUserByUserName(testUserId), User())
     }
 }

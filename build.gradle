@@ -30,7 +30,7 @@ apply plugin: 'kotlin-jpa'
 apply plugin: 'com.adarshr.test-logger'
 
 group = 'com.julien.search'
-version = '0.1.8'
+version = '0.1.9'
 
 repositories {
 	mavenCentral()
