@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
 @ExtendWith(SpringExtension::class)
-@WebMvcTest(SearchService::class)
+@WebMvcTest(SearchService::class, properties = [ "database.login.enableUserValidation=true" ])
 @ContextConfiguration(classes = [
     DefaultUserDAO::class,
     JdbcUserRepository::class,

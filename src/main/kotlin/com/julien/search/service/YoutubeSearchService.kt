@@ -156,13 +156,13 @@ class YoutubeSearchService : SearchService {
                     if (cachedJob.isCancelled()) {
                         break
                     }
-                    processedVideos.put(query, cachedJob.copy(Mp3DownloadResponse.ModelMapper.from(currentVideo, query, currentVideo.youtubeDL)))
+                    processedVideos.put(query, cachedJob.copy(Mp3DownloadResponse.ModelMapper.from(currentVideo, query)))
                 } else {
                     processedVideos.put(query,
                         ProcessingJob(
                             userId = userId,
                             jobId = jobId,
-                            response = Mp3DownloadResponse.ModelMapper.from(currentVideo, query, currentVideo.youtubeDL)
+                            response = Mp3DownloadResponse.ModelMapper.from(currentVideo, query)
                         ))
                 }
                 val downloadedVideo = videoDownloadDAO.download(currentVideo)

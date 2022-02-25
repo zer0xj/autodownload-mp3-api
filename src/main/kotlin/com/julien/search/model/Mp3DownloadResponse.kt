@@ -44,14 +44,14 @@ data class Mp3DownloadResponse(
         }
 
     object ModelMapper {
-        fun from(youtubeVideo: YoutubeVideo?, query: String, youtubeDL: LocalYoutubeDL? = null) =
+        fun from(youtubeVideo: YoutubeVideo?, query: String) =
             Mp3DownloadResponse(
                 filename = youtubeVideo?.filename,
                 previouslyDownloaded = youtubeVideo?.previouslyDownloaded,
                 query = query,
                 success = (youtubeVideo != null),
                 url = youtubeVideo?.url,
-                youtubeDL = youtubeDL
+                youtubeDL = youtubeVideo?.youtubeDL
             )
     }
 }
