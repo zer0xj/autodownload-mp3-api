@@ -27,7 +27,7 @@ youtube:
   maxResults: 5
 
 youtube-dl:
-  location: /usr/local/bin/youtube-dl
+  location: /usr/local/bin/yt-dlp
 
 downloads:
   location: /Users/zer0x/Desktop

@@ -116,7 +116,7 @@ class YoutubeSearchService : SearchService {
                     userId = userId,
                     jobId = uuid,
                     response = Mp3DownloadResponse(query = query),
-                    future = CompletableFuture.runAsync { asyncSearchAndDownload(userId, uuid, query) }
+                    future = asyncSearchAndDownload(userId, uuid, query)
                 ))
 
             ProcessingJob(jobId = uuid)
@@ -132,19 +132,20 @@ class YoutubeSearchService : SearchService {
     }
 
     @Async("threadPoolTaskExecutor")
-    fun asyncSearchAndDownload(userId: Int, jobId: String, query: String) {
-        logger.debug("asyncSearchAndDownload(userId=$userId, jobId=$jobId, query=$query)")
+    fun asyncSearchAndDownload(userId: Int, jobId: String, query: String): CompletableFuture<Void> =
+        CompletableFuture.runAsync {
+            logger.debug("asyncSearchAndDownload(userId=$userId, jobId=$jobId, query=$query)")
 
-        val videoList: List<YoutubeVideo> = searchDAO.search(query)
+            val videoList: List<YoutubeVideo> = searchDAO.search(query)
 
-        logger.debug("asyncSearchAndDownload(userId=$userId, jobId=$jobId, query=$query) SEARCH RESPONSE: $videoList")
+            logger.debug("asyncSearchAndDownload(userId=$userId, jobId=$jobId, query=$query) SEARCH RESPONSE: $videoList")
 
-        val result: YoutubeVideo? = downloadVideo(userId, jobId, query, videoList)
+            val result: YoutubeVideo? = downloadVideo(userId, jobId, query, videoList)
 
-        logger.debug("asyncSearchAndDownload(userId=$userId, jobId=$jobId, query=$query) DOWNLOAD RESPONSE: $result")
+            logger.debug("asyncSearchAndDownload(userId=$userId, jobId=$jobId, query=$query) DOWNLOAD RESPONSE: $result")
 
-        historyDAO.save(query, result)
-    }
+            historyDAO.save(query, result)
+        }
 
     private fun downloadVideo(userId: Int, jobId: String, query: String, videoList: List<YoutubeVideo>): YoutubeVideo? {
         for (video in videoList) {

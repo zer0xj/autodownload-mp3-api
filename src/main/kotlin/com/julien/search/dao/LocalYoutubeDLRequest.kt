@@ -12,7 +12,7 @@ class LocalYoutubeDLRequest(url: String? = null, directory: String) : YoutubeDLR
         // Add youtube-dl command-line options
         setOption("add-metadata")
         setOption("audio-format", "mp3")
-        setOption("audio-quality", "128K")
+        setOption("audio-quality", "192K")
         setOption("continue")
         setOption("extract-audio")
         setOption("format", "bestaudio")
